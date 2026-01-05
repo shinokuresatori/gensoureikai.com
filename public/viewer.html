@@ -3,12 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <title>Viewer</title>
-<link rel="stylesheet" href="https://booth.pm/items/1028555/font.css"> <!-- 仮のURL、実際はダウンロード後CSS参照 -->
 <style>
+@font-face {
+  font-family: '装甲明朝';
+  src: url('https://booth.pm/items/1028555/font.woff2') format('woff2'); /* 実際に配置するURLに置き換えてね */
+}
+
 body {
   background:#000;
   color:#e0e0e0;
-  font-family: "装甲明朝", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family:'装甲明朝', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   padding:30px;
 }
 
@@ -35,6 +39,56 @@ h1::after, h2::after, h3::after {
   margin-bottom:30px;
 }
 
+.arg-list {
+  display:flex;
+  gap:20px;
+  flex-wrap: wrap;
+}
+
+.arg-card {
+  background:#050505;
+  border:1px solid #555;
+  width:180px;
+  padding:10px;
+  text-align:center;
+  position:relative;
+}
+
+.arg-card img {
+  width:100%;
+  height:auto;
+  display:block;
+  margin-bottom:6px;
+}
+
+.arg-status {
+  position:absolute;
+  top:6px;
+  right:6px;
+  background:#6fa8ff;
+  color:#000;
+  font-size:0.7em;
+  padding:2px 4px;
+  border-radius:4px;
+}
+
+.arg-title {
+  font-weight:bold;
+  margin-bottom:6px;
+}
+
+.arg-link button {
+  background:#000;
+  color:#ccc;
+  border:1px solid #444;
+  padding:4px 8px;
+  cursor:pointer;
+}
+.arg-link button:hover {
+  background:#111;
+}
+
+/* カレンダーとその他既存スタイル */
 #today, #realtime, #onsale, #investigation {
   border:1px solid #555;
   padding:20px;
@@ -117,17 +171,6 @@ h1::after, h2::after, h3::after {
   background:#050505;
 }
 
-button {
-  background:#000;
-  color:#ccc;
-  border:1px solid #444;
-  padding:4px 10px;
-  cursor:pointer;
-}
-button:hover {
-  background:#111;
-}
-
 /* ====== 未来日点滅アニメ ====== */
 @keyframes blinkMask {
   0%, 50%, 100% { color: #444; transform: translateX(0); }
@@ -137,28 +180,12 @@ button:hover {
 #detail.future {
   animation: blinkMask 1s infinite;
 }
-
-/* 進行度バー */
-.progress-container {
-  background:#222;
-  border:1px solid #555;
-  border-radius:4px;
-  overflow:hidden;
-  height:20px;
-  margin-top:10px;
-}
-.progress-bar {
-  background:#6fa8ff;
-  height:100%;
-  width:0%;
-  transition: width 0.5s;
-}
 </style>
 </head>
 <body>
 
 <h1>調査中のARG</h1>
-<div id="investigation">読み込み中…</div>
+<div class="arg-list" id="investigation"></div>
 
 <h1>本日の記録</h1>
 <div id="today">読み込み中…</div>
@@ -179,28 +206,66 @@ button:hover {
 <div class="calendar" id="calendar"></div>
 <div id="detail"></div>
 
-<h2>進行度</h2>
-<div class="progress-container">
-  <div class="progress-bar" id="progressBar"></div>
-</div>
-
 <script>
 let DATA = {};
 let selectedDiv = null;
 
-// ダミーデータ（実際はAPIから取得）
-let ARG_DATA = {
-  investigation: "ARG-α 調査中…\nヒントを解析中",
-  realtime: "ARG-β 現在進行中！\nプレイヤー参加可能",
-  onsale: "ARG-γ 販売中！\n購入して参加可能",
-  progress: 45 // %
+// ダミーARGデータ
+const ARG_DATA = {
+  investigation: [
+    { title:"ARG-α", status:"調査中", thumbnail:"https://via.placeholder.com/180x100", url:"#"},
+    { title:"ARG-β", status:"完了", thumbnail:"https://via.placeholder.com/180x100", url:"#"}
+  ],
+  realtime: [
+    { title:"ARG-γ", status:"進行中", thumbnail:"https://via.placeholder.com/180x100", url:"#"}
+  ],
+  onsale: [
+    { title:"ARG-δ", status:"販売中", thumbnail:"https://via.placeholder.com/180x100", url:"#"}
+  ]
 };
 
-function updateARG() {
-  document.getElementById("investigation").textContent = ARG_DATA.investigation;
-  document.getElementById("realtime").textContent = ARG_DATA.realtime;
-  document.getElementById("onsale").textContent = ARG_DATA.onsale;
-  document.getElementById("progressBar").style.width = ARG_DATA.progress + "%";
+function renderARG() {
+  const investigationDiv = document.getElementById("investigation");
+  investigationDiv.innerHTML = "";
+  ARG_DATA.investigation.forEach(arg => {
+    const card = document.createElement("div");
+    card.className = "arg-card";
+    card.innerHTML = `
+      <img src="${arg.thumbnail}" alt="${arg.title}">
+      <div class="arg-status">${arg.status}</div>
+      <div class="arg-title">${arg.title}</div>
+      <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
+    `;
+    investigationDiv.appendChild(card);
+  });
+
+  const realtimeDiv = document.getElementById("realtime");
+  realtimeDiv.innerHTML = "";
+  ARG_DATA.realtime.forEach(arg => {
+    const card = document.createElement("div");
+    card.className = "arg-card";
+    card.innerHTML = `
+      <img src="${arg.thumbnail}" alt="${arg.title}">
+      <div class="arg-status">${arg.status}</div>
+      <div class="arg-title">${arg.title}</div>
+      <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
+    `;
+    realtimeDiv.appendChild(card);
+  });
+
+  const onsaleDiv = document.getElementById("onsale");
+  onsaleDiv.innerHTML = "";
+  ARG_DATA.onsale.forEach(arg => {
+    const card = document.createElement("div");
+    card.className = "arg-card";
+    card.innerHTML = `
+      <img src="${arg.thumbnail}" alt="${arg.title}">
+      <div class="arg-status">${arg.status}</div>
+      <div class="arg-title">${arg.title}</div>
+      <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
+    `;
+    onsaleDiv.appendChild(card);
+  });
 }
 
 // 今日の日付取得
@@ -224,7 +289,7 @@ async function loadData() {
     const res = await fetch("/api/data");
     DATA = await res.json();
     render();
-    updateARG();
+    renderARG();
   } catch(e) {
     console.error(e);
     document.getElementById("today").textContent = "データ取得エラー";
