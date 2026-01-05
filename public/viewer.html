@@ -7,7 +7,8 @@
 /* --- アップロードした装甲明朝フォント --- */
 @font-face {
   font-family: '装甲明朝';
-  src: url('https://fonts.google.com/specimen/Shippori+Mincho?query=Mincho&preview.text=soukoumincho') format('truetype');
+  src: url('./36022514-2b0f-4b45-b4bc-87b99a07fa47.ttf') format('truetype');
+  font-display: swap;
 }
 
 body {
@@ -17,6 +18,7 @@ body {
   padding:30px;
 }
 
+/* --- ヘッダ装飾 --- */
 h1,h2,h3 {
   letter-spacing:0.25em;
   font-weight:normal;
@@ -36,9 +38,7 @@ h1::after, h2::after, h3::after {
   margin-top:6px;
 }
 
-.section {
-  margin-bottom:30px;
-}
+.section { margin-bottom:30px; }
 
 /* --- ARGカード表示 --- */
 .arg-list {
@@ -74,10 +74,7 @@ h1::after, h2::after, h3::after {
   border-radius:4px;
 }
 
-.arg-title {
-  font-weight:bold;
-  margin-bottom:6px;
-}
+.arg-title { font-weight:bold; margin-bottom:6px; }
 
 .arg-link button {
   background:#000;
@@ -86,9 +83,7 @@ h1::after, h2::after, h3::after {
   padding:4px 8px;
   cursor:pointer;
 }
-.arg-link button:hover {
-  background:#111;
-}
+.arg-link button:hover { background:#111; }
 
 /* --- カレンダー・その他既存スタイル --- */
 #today, #realtime, #onsale, #investigation {
@@ -107,9 +102,7 @@ h1::after, h2::after, h3::after {
   color:#888;
 }
 
-#monthLabel {
-  letter-spacing:0.2em;
-}
+#monthLabel { letter-spacing:0.2em; }
 
 .calendar {
   display:grid;
@@ -147,22 +140,13 @@ h1::after, h2::after, h3::after {
   color:#888;
 }
 
-.day.future {
-  color:#444;
-}
+.day.future { color:#444; }
 
-.day.today {
-  outline:1px solid #fff;
-}
+.day.today { outline:1px solid #fff; }
 
-.day.selected {
-  outline:2px solid #6fa8ff;
-}
+.day.selected { outline:2px solid #6fa8ff; }
 
-.empty {
-  border:none;
-  cursor:default;
-}
+.empty { border:none; cursor:default; }
 
 #detail {
   margin-top:20px;
@@ -179,9 +163,7 @@ h1::after, h2::after, h3::after {
   25% { color: #888; transform: translateX(1px); }
   75% { color: #bbb; transform: translateX(-1px); }
 }
-#detail.future {
-  animation: blinkMask 1s infinite;
-}
+#detail.future { animation: blinkMask 1s infinite; }
 </style>
 </head>
 <body>
@@ -212,17 +194,20 @@ h1::after, h2::after, h3::after {
 let DATA = {};
 let selectedDiv = null;
 
+// ダミーARG画像統一
+const DUMMY_IMG = "https://drive.google.com/uc?export=view&id=1mXop19iCbIctsqYz96Duknu0SWfurJkk";
+
 // ダミーARGデータ
 const ARG_DATA = {
   investigation: [
-    { title:"ARG-α", status:"調査中", thumbnail:"https://drive.google.com/file/d/1mXop19iCbIctsqYz96Duknu0SWfurJkk/view?usp=drive_link", url:"#"},
-    { title:"ARG-β", status:"完了", thumbnail:"https://drive.google.com/file/d/1mXop19iCbIctsqYz96Duknu0SWfurJkk/view?usp=drive_link", url:"#"}
+    { title:"ARG-α", status:"調査中", thumbnail:DUMMY_IMG, url:"#"},
+    { title:"ARG-β", status:"完了", thumbnail:DUMMY_IMG, url:"#"}
   ],
   realtime: [
-    { title:"ARG-γ", status:"進行中", thumbnail:"https://drive.google.com/file/d/1mXop19iCbIctsqYz96Duknu0SWfurJkk/view?usp=drive_link", url:"#"}
+    { title:"ARG-γ", status:"進行中", thumbnail:DUMMY_IMG, url:"#"}
   ],
   onsale: [
-    { title:"ARG-δ", status:"販売中", thumbnail:"https://drive.google.com/file/d/1mXop19iCbIctsqYz96Duknu0SWfurJkk/view?usp=drive_link", url:"#"}
+    { title:"ARG-δ", status:"販売中", thumbnail:DUMMY_IMG, url:"#"}
   ]
 };
 
@@ -237,7 +222,7 @@ function renderARG() {
         <img src="${arg.thumbnail}" alt="${arg.title}">
         <div class="arg-status">${arg.status}</div>
         <div class="arg-title">${arg.title}</div>
-        <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">接続</button></div>
+        <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
       `;
       container.appendChild(card);
     });
@@ -255,9 +240,7 @@ function getTodayJST() {
 let viewYear, viewMonth;
 
 // 未来日伏せ字
-function mask(text) {
-  return "▓".repeat(Math.max(10, text.length));
-}
+function mask(text) { return "▓".repeat(Math.max(10, text.length)); }
 
 // データ取得
 async function loadData() {
