@@ -215,14 +215,14 @@ let selectedDiv = null;
 // ダミーARGデータ
 const ARG_DATA = {
   investigation: [
-    { title:"ARG-α", status:"調査中", thumbnail:"https://via.placeholder.com/180x100", url:"#"},
-    { title:"ARG-β", status:"完了", thumbnail:"https://via.placeholder.com/180x100", url:"#"}
+    { title:"ARG-α", status:"調査中", thumbnail:"https://drive.google.com/file/d/1mXop19iCbIctsqYz96Duknu0SWfurJkk/view?usp=drive_link", url:"#"},
+    { title:"ARG-β", status:"完了", thumbnail:"https://drive.google.com/file/d/1mXop19iCbIctsqYz96Duknu0SWfurJkk/view?usp=drive_link", url:"#"}
   ],
   realtime: [
-    { title:"ARG-γ", status:"進行中", thumbnail:"https://via.placeholder.com/180x100", url:"#"}
+    { title:"ARG-γ", status:"進行中", thumbnail:"https://drive.google.com/file/d/1mXop19iCbIctsqYz96Duknu0SWfurJkk/view?usp=drive_link", url:"#"}
   ],
   onsale: [
-    { title:"ARG-δ", status:"販売中", thumbnail:"https://via.placeholder.com/180x100", url:"#"}
+    { title:"ARG-δ", status:"販売中", thumbnail:"https://drive.google.com/file/d/1mXop19iCbIctsqYz96Duknu0SWfurJkk/view?usp=drive_link", url:"#"}
   ]
 };
 
@@ -237,7 +237,7 @@ function renderARG() {
         <img src="${arg.thumbnail}" alt="${arg.title}">
         <div class="arg-status">${arg.status}</div>
         <div class="arg-title">${arg.title}</div>
-        <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
+        <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">接続</button></div>
       `;
       container.appendChild(card);
     });
