@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+</head>
+<body>
+
+<h1>予定管理</h1>
+
+<label>
+日付：
+<input type="date" id="date">
+</label>
+
+<br><br>
+
+<textarea id="detail" rows="6" cols="40"
+placeholder="予定の詳細を入力"></textarea>
+
+<br><br>
+<button onclick="save()">保存</button>
+
+<script>
+async function save() {
+  const date = document.getElementById("date").value;
+  const detail = document.getElementById("detail").value;
+
+  await fetch("/api/save", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ date, detail })
+  });
+
+  alert("保存しました");
+}
+</script>
+
+</body>
+</html>
