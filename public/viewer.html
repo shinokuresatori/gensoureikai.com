@@ -4,20 +4,19 @@
 <meta charset="UTF-8">
 <title>DDS - Dimension Development System</title>
 <style>
-/* ====== 基本スタイル（モノクロ・等幅） ====== */
 body {
   background:#000;
   color:#e0e0e0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   padding:30px;
 }
+
 h1,h2 {
   letter-spacing:0.25em;
   font-weight:normal;
   position:relative;
 }
 
-/* 見出し装飾ライン */
 h1::before, h2::before {
   content:"┏━━━━━━━━━━━━━━━━━━━━━━┓";
   display:block;
@@ -40,7 +39,6 @@ h1::after, h2::after {
   white-space:pre-wrap;
 }
 
-/* 月操作部 */
 .controls {
   display:flex;
   align-items:center;
@@ -53,7 +51,6 @@ h1::after, h2::after {
   letter-spacing:0.2em;
 }
 
-/* カレンダー */
 .calendar {
   display:grid;
   grid-template-columns:repeat(7,1fr);
@@ -63,7 +60,6 @@ h1::after, h2::after {
   background:#020202;
 }
 
-/* 曜日 */
 .weekday {
   text-align:center;
   font-size:0.85em;
@@ -72,7 +68,6 @@ h1::after, h2::after {
   padding-bottom:4px;
 }
 
-/* 日付セル */
 .day {
   border:1px solid #222;
   padding:10px;
@@ -80,9 +75,9 @@ h1::after, h2::after {
   cursor:pointer;
   background:#010101;
   position:relative;
+  transition: all 0.2s;
 }
 
-/* 記録あり */
 .day.has::after {
   content:"■";
   position:absolute;
@@ -92,23 +87,23 @@ h1::after, h2::after {
   color:#888;
 }
 
-/* 未来日 */
 .day.future {
   color:#444;
 }
 
-/* 今日 */
 .day.today {
   outline:1px solid #fff;
 }
 
-/* 空白 */
+.day.selected {
+  outline:2px solid #6fa8ff;
+}
+
 .empty {
   border:none;
   cursor:default;
 }
 
-/* 詳細表示 */
 #detail {
   margin-top:20px;
   border:1px solid #444;
@@ -130,7 +125,7 @@ button:hover {
   background:#111;
 }
 
-/* ====== 未来日の点滅アニメ ====== */
+/* ====== 未来日点滅アニメ ====== */
 @keyframes blinkMask {
   0%, 50%, 100% { color: #444; transform: translateX(0); }
   25% { color: #888; transform: translateX(1px); }
@@ -159,6 +154,7 @@ button:hover {
 
 <script>
 let DATA = {};
+let selectedDiv = null;
 
 // 今日の日付取得
 function getTodayJST() {
@@ -245,6 +241,11 @@ function render() {
     if (key === todayKey) div.classList.add("today");
 
     div.onclick = () => {
+      // 選択枠更新
+      if (selectedDiv) selectedDiv.classList.remove("selected");
+      div.classList.add("selected");
+      selectedDiv = div;
+
       const detailDiv = document.getElementById("detail");
       if (hasData) {
         detailDiv.textContent = `【${key}】\n\n` + (isFuture ? mask(DATA[key]) : DATA[key]);
