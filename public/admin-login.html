@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+</head>
+<body>
+
+<h2>管理者認証</h2>
+
+<input type="password" id="key" placeholder="鍵を入力">
+<button onclick="login()">開く</button>
+
+<script>
+async function login() {
+  const key = document.getElementById("key").value;
+
+  const res = await fetch("/api/admin-login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ key })
+  });
+
+  if (res.ok) {
+    location.href = "/admin-panel.html";
+  } else {
+    alert("鍵が違います");
+  }
+}
+</script>
+
+</body>
+</html>
