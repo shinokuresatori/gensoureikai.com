@@ -38,7 +38,7 @@ app.post("/status", (req, res) => {
 
 // 動作確認用
 app.get("/", (req, res) => {
-  res.send("BPS server is running");
+  res.send("DDS server is running");
 });
 
 // ===== server start =====
