@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <title>Viewer</title>
 <style>
+/* --- アップロードした装甲明朝フォント --- */
 @font-face {
   font-family: '装甲明朝';
-  src: url('https://booth.pm/items/1028555/font.woff2') format('woff2'); /* 実際に配置するURLに置き換えてね */
+  src: url('./36022514-2b0f-4b45-b4bc-87b99a07fa47.ttf') format('truetype');
 }
 
 body {
@@ -39,6 +40,7 @@ h1::after, h2::after, h3::after {
   margin-bottom:30px;
 }
 
+/* --- ARGカード表示 --- */
 .arg-list {
   display:flex;
   gap:20px;
@@ -88,7 +90,7 @@ h1::after, h2::after, h3::after {
   background:#111;
 }
 
-/* カレンダーとその他既存スタイル */
+/* --- カレンダー・その他既存スタイル --- */
 #today, #realtime, #onsale, #investigation {
   border:1px solid #555;
   padding:20px;
@@ -191,10 +193,10 @@ h1::after, h2::after, h3::after {
 <div id="today">読み込み中…</div>
 
 <h1>今開催中のリアルタイムARG</h1>
-<div id="realtime">読み込み中…</div>
+<div class="arg-list" id="realtime"></div>
 
 <h1>販売中のARG</h1>
-<div id="onsale">読み込み中…</div>
+<div class="arg-list" id="onsale"></div>
 
 <h1>記録カレンダー</h1>
 <div class="controls">
@@ -225,46 +227,20 @@ const ARG_DATA = {
 };
 
 function renderARG() {
-  const investigationDiv = document.getElementById("investigation");
-  investigationDiv.innerHTML = "";
-  ARG_DATA.investigation.forEach(arg => {
-    const card = document.createElement("div");
-    card.className = "arg-card";
-    card.innerHTML = `
-      <img src="${arg.thumbnail}" alt="${arg.title}">
-      <div class="arg-status">${arg.status}</div>
-      <div class="arg-title">${arg.title}</div>
-      <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
-    `;
-    investigationDiv.appendChild(card);
-  });
-
-  const realtimeDiv = document.getElementById("realtime");
-  realtimeDiv.innerHTML = "";
-  ARG_DATA.realtime.forEach(arg => {
-    const card = document.createElement("div");
-    card.className = "arg-card";
-    card.innerHTML = `
-      <img src="${arg.thumbnail}" alt="${arg.title}">
-      <div class="arg-status">${arg.status}</div>
-      <div class="arg-title">${arg.title}</div>
-      <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
-    `;
-    realtimeDiv.appendChild(card);
-  });
-
-  const onsaleDiv = document.getElementById("onsale");
-  onsaleDiv.innerHTML = "";
-  ARG_DATA.onsale.forEach(arg => {
-    const card = document.createElement("div");
-    card.className = "arg-card";
-    card.innerHTML = `
-      <img src="${arg.thumbnail}" alt="${arg.title}">
-      <div class="arg-status">${arg.status}</div>
-      <div class="arg-title">${arg.title}</div>
-      <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
-    `;
-    onsaleDiv.appendChild(card);
+  ["investigation","realtime","onsale"].forEach(section => {
+    const container = document.getElementById(section);
+    container.innerHTML = "";
+    ARG_DATA[section].forEach(arg => {
+      const card = document.createElement("div");
+      card.className = "arg-card";
+      card.innerHTML = `
+        <img src="${arg.thumbnail}" alt="${arg.title}">
+        <div class="arg-status">${arg.status}</div>
+        <div class="arg-title">${arg.title}</div>
+        <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
+      `;
+      container.appendChild(card);
+    });
   });
 }
 
