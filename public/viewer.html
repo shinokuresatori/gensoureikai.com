@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>Viewer</title>
+<title>DDS - Dimension Development System</title>
 <style>
 body {
   background:#0b0e14;
@@ -20,10 +20,21 @@ h1,h2 {
   margin-bottom:30px;
   min-height:80px;
 }
+.controls {
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin-bottom:10px;
+}
 .calendar {
   display:grid;
   grid-template-columns:repeat(7,1fr);
   gap:6px;
+}
+.weekday {
+  text-align:center;
+  font-weight:bold;
+  color:#aaa;
 }
 .day {
   border:1px solid #333;
@@ -41,10 +52,21 @@ h1,h2 {
 .day.today {
   outline:2px solid #6fa8ff;
 }
+.empty {
+  border:none;
+  cursor:default;
+}
 #detail {
   margin-top:20px;
   white-space:pre-wrap;
   min-height:80px;
+}
+button {
+  background:#1a2340;
+  color:#e6e6eb;
+  border:1px solid #444;
+  padding:5px 10px;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -54,8 +76,14 @@ h1,h2 {
 <div id="today">読み込み中…</div>
 
 <h2>記録カレンダー</h2>
-<div class="calendar" id="calendar"></div>
 
+<div class="controls">
+  <button onclick="changeMonth(-1)">◀</button>
+  <div id="monthLabel"></div>
+  <button onclick="changeMonth(1)">▶</button>
+</div>
+
+<div class="calendar" id="calendar"></div>
 <div id="detail"></div>
 
 <script>
@@ -67,6 +95,8 @@ function getTodayJST() {
   return d.toISOString().slice(0,10);
 }
 
+let viewYear, viewMonth;
+
 function mask(text) {
   return "▓".repeat(Math.max(10, text.length));
 }
@@ -77,27 +107,56 @@ async function loadData() {
   render();
 }
 
+function changeMonth(diff) {
+  viewMonth += diff;
+  if (viewMonth < 0) {
+    viewMonth = 11;
+    viewYear--;
+  }
+  if (viewMonth > 11) {
+    viewMonth = 0;
+    viewYear++;
+  }
+  render();
+}
+
 function render() {
   const todayKey = getTodayJST();
 
-  // ===== 本日の記録 =====
-  if (DATA[todayKey]) {
-    document.getElementById("today").textContent = DATA[todayKey];
-  } else {
-    document.getElementById("today").textContent = "本日の記録は存在しません";
-  }
+  // 本日の記録
+  document.getElementById("today").textContent =
+    DATA[todayKey] || "本日の記録は存在しません";
 
-  // ===== カレンダー =====
+  // 月表示
+  document.getElementById("monthLabel").textContent =
+    `${viewYear}年 ${viewMonth + 1}月`;
+
   const cal = document.getElementById("calendar");
   cal.innerHTML = "";
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const last = new Date(year, month + 1, 0).getDate();
+  // 曜日ヘッダー
+  const weekdays = ["日","月","火","水","木","金","土"];
+  weekdays.forEach(w => {
+    const div = document.createElement("div");
+    div.className = "weekday";
+    div.textContent = w;
+    cal.appendChild(div);
+  });
+
+  // 月初の曜日
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+
+  // 空白マス
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    cal.appendChild(empty);
+  }
+
+  const last = new Date(viewYear, viewMonth + 1, 0).getDate();
 
   for (let d = 1; d <= last; d++) {
-    const key = `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const key = `${viewYear}-${String(viewMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const div = document.createElement("div");
     div.className = "day";
     div.textContent = d;
@@ -111,13 +170,8 @@ function render() {
 
     div.onclick = () => {
       if (hasData) {
-        if (isFuture) {
-          document.getElementById("detail").textContent =
-            `【${key}】\n\n` + mask(DATA[key]);
-        } else {
-          document.getElementById("detail").textContent =
-            `【${key}】\n\n` + DATA[key];
-        }
+        document.getElementById("detail").textContent =
+          `【${key}】\n\n` + (isFuture ? mask(DATA[key]) : DATA[key]);
       } else {
         document.getElementById("detail").textContent =
           `【${key}】\n\n記録なし`;
@@ -128,8 +182,14 @@ function render() {
   }
 }
 
-loadData();
-setInterval(loadData, 5000);
+// 初期化
+(function init() {
+  const now = new Date();
+  viewYear = now.getFullYear();
+  viewMonth = now.getMonth();
+  loadData();
+  setInterval(loadData, 5000);
+})();
 </script>
 
 </body>
