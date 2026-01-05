@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Viewer</title>
 <style>
-/* --- アップロードした装甲明朝フォント --- */
 @font-face {
   font-family: '装甲明朝';
   src: url('./36022514-2b0f-4b45-b4bc-87b99a07fa47.ttf') format('truetype');
@@ -18,7 +17,6 @@ body {
   padding:30px;
 }
 
-/* --- ヘッダ装飾 --- */
 h1,h2,h3 {
   letter-spacing:0.25em;
   font-weight:normal;
@@ -40,7 +38,6 @@ h1::after, h2::after, h3::after {
 
 .section { margin-bottom:30px; }
 
-/* --- ARGカード表示 --- */
 .arg-list {
   display:flex;
   gap:20px;
@@ -85,7 +82,6 @@ h1::after, h2::after, h3::after {
 }
 .arg-link button:hover { background:#111; }
 
-/* --- カレンダー・その他既存スタイル --- */
 #today, #realtime, #onsale, #investigation {
   border:1px solid #555;
   padding:20px;
@@ -157,7 +153,6 @@ h1::after, h2::after, h3::after {
   background:#050505;
 }
 
-/* ====== 未来日点滅アニメ ====== */
 @keyframes blinkMask {
   0%, 50%, 100% { color: #444; transform: translateX(0); }
   25% { color: #888; transform: translateX(1px); }
@@ -194,10 +189,9 @@ h1::after, h2::after, h3::after {
 let DATA = {};
 let selectedDiv = null;
 
-// ダミーARG画像統一
-const DUMMY_IMG = "https://drive.google.com/uc?export=view&id=1mXop19iCbIctsqYz96Duknu0SWfurJkk";
+// ローカル画像を使用
+const DUMMY_IMG = "./dummy.png";
 
-// ダミーARGデータ
 const ARG_DATA = {
   investigation: [
     { title:"ARG-α", status:"調査中", thumbnail:DUMMY_IMG, url:"#"},
@@ -229,20 +223,16 @@ function renderARG() {
   });
 }
 
-// 今日の日付取得
 function getTodayJST() {
   const d = new Date();
   d.setHours(d.getHours() + 9);
   return d.toISOString().slice(0,10);
 }
 
-// 表示中の年月
 let viewYear, viewMonth;
 
-// 未来日伏せ字
 function mask(text) { return "▓".repeat(Math.max(10, text.length)); }
 
-// データ取得
 async function loadData() {
   try {
     const res = await fetch("/api/data");
@@ -255,7 +245,6 @@ async function loadData() {
   }
 }
 
-// 月移動
 function changeMonth(diff) {
   viewMonth += diff;
   if (viewMonth < 0) { viewMonth = 11; viewYear--; }
@@ -263,10 +252,8 @@ function changeMonth(diff) {
   render();
 }
 
-// カレンダー描画
 function render() {
   const todayKey = getTodayJST();
-
   document.getElementById("today").textContent =
     DATA[todayKey] || "本日の記録は存在しません";
 
@@ -285,7 +272,6 @@ function render() {
   });
 
   const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-
   for (let i = 0; i < firstDay; i++) {
     const empty = document.createElement("div");
     empty.className = "empty";
@@ -293,7 +279,6 @@ function render() {
   }
 
   const last = new Date(viewYear, viewMonth + 1, 0).getDate();
-
   for (let d = 1; d <= last; d++) {
     const key = `${viewYear}-${String(viewMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const div = document.createElement("div");
@@ -327,7 +312,6 @@ function render() {
   }
 }
 
-// 初期化
 (function init() {
   const now = new Date();
   viewYear = now.getFullYear();
