@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>DDS - Dimension Development System</title>
+<title>DDS - Dimension Development System><title>
 <style>
 body {
   background:#0b0e14;
@@ -34,12 +34,17 @@ h1,h2 {
 .day.has {
   background:#1a2340;
 }
+.day.future {
+  background:#0d1020;
+  color:#555;
+}
 .day.today {
   outline:2px solid #6fa8ff;
 }
 #detail {
   margin-top:20px;
   white-space:pre-wrap;
+  min-height:80px;
 }
 </style>
 </head>
@@ -62,6 +67,10 @@ function getTodayJST() {
   return d.toISOString().slice(0,10);
 }
 
+function mask(text) {
+  return "▓".repeat(Math.max(10, text.length));
+}
+
 async function loadData() {
   const res = await fetch("/api/data");
   DATA = await res.json();
@@ -70,9 +79,15 @@ async function loadData() {
 
 function render() {
   const todayKey = getTodayJST();
-  document.getElementById("today").textContent =
-    DATA[todayKey] || "本日の記録は存在しません";
 
+  // ===== 本日の記録 =====
+  if (DATA[todayKey]) {
+    document.getElementById("today").textContent = DATA[todayKey];
+  } else {
+    document.getElementById("today").textContent = "本日の記録は存在しません";
+  }
+
+  // ===== カレンダー =====
   const cal = document.getElementById("calendar");
   cal.innerHTML = "";
 
@@ -87,12 +102,26 @@ function render() {
     div.className = "day";
     div.textContent = d;
 
-    if (DATA[key]) div.classList.add("has");
+    const isFuture = key > todayKey;
+    const hasData = DATA[key];
+
+    if (hasData) div.classList.add("has");
+    if (isFuture) div.classList.add("future");
     if (key === todayKey) div.classList.add("today");
 
     div.onclick = () => {
-      document.getElementById("detail").textContent =
-        `【${key}】\n\n` + (DATA[key] || "記録なし");
+      if (hasData) {
+        if (isFuture) {
+          document.getElementById("detail").textContent =
+            `【${key}】\n\n` + mask(DATA[key]);
+        } else {
+          document.getElementById("detail").textContent =
+            `【${key}】\n\n` + DATA[key];
+        }
+      } else {
+        document.getElementById("detail").textContent =
+          `【${key}】\n\n記録なし`;
+      }
     };
 
     cal.appendChild(div);
