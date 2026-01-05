@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
@@ -7,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ===== 状態保存（最小構成）=====
+// ===== 状態保存 =====
 let currentStatus = {
   message: "System initialized.",
   updatedAt: new Date().toISOString()
@@ -20,7 +21,7 @@ app.get("/status", (req, res) => {
   res.json(currentStatus);
 });
 
-// admin 用
+// admin 用（更新）
 app.post("/status", (req, res) => {
   const { message } = req.body;
 
@@ -36,13 +37,7 @@ app.post("/status", (req, res) => {
   res.json({ success: true });
 });
 
-// 動作確認用
+// ===== viewer ページ =====
 app.get("/", (req, res) => {
-  res.send("DDS server is running");
-});
-
-// ===== server start =====
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Listening on " + PORT);
+  res.sendFile(path.join(__dirname, "viewer.html"));
 });
