@@ -1,88 +1,45 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>BPS Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: radial-gradient(circle at top, #111 0%, #000 60%);
-      color: #e5e5e5;
-      font-family: "Noto Sans JP", system-ui, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card {
-      max-width: 600px;
-      width: 90%;
-      padding: 32px;
-      border: 1px solid #333;
-      border-radius: 12px;
-      background: rgba(20,20,20,0.8);
-      box-shadow: 0 0 40px rgba(0,0,0,0.8);
-    }
-
-    h1 {
-      margin: 0 0 16px;
-      font-size: 20px;
-      letter-spacing: 0.15em;
-      color: #9ad;
-    }
-
-    .status {
-      font-size: 24px;
-      margin: 24px 0;
-    }
-
-    .time {
-      font-size: 13px;
-      color: #aaa;
-      text-align: right;
-    }
-
-    .loading {
-      opacity: 0.6;
-      animation: blink 1.5s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 0.6; }
-      50% { opacity: 1; }
-    }
-  </style>
+<meta charset="UTF-8">
+<title>DDS - Dimension Development System</title>
+<style>
+body {
+  background: #0b0e14;
+  color: #e6e6eb;
+  font-family: system-ui, sans-serif;
+  padding: 40px;
+}
+h1 {
+  letter-spacing: 0.2em;
+}
+#content {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid #444;
+  background: #111522;
+  min-height: 120px;
+}
+</style>
 </head>
 <body>
 
-  <div class="card">
-    <h1>BPS SYSTEM / VIEWER</h1>
-    <div id="status" class="status loading">Loading…</div>
-    <div id="time" class="time"></div>
-  </div>
+<h1>本日の記録</h1>
+<div id="content">読み込み中…</div>
 
-  <script>
-    const API_URL = "https://gensoureikai.onrender.com/status";
+<script>
+async function load() {
+  const res = await fetch("/api/data");
+  const data = await res.json();
 
-    async function loadStatus() {
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
+  const today = new Date().toISOString().slice(0,10);
+  document.getElementById("content").textContent =
+    data[today] || "記録は存在しません";
+}
 
-        document.getElementById("status").textContent = data.message;
-        document.getElementById("status").classList.remove("loading");
-        document.getElementById("time").textContent =
-          "Last update: " + new Date(data.updatedAt).toLocaleString();
-      } catch (e) {
-        document.getElementById("status").textContent = "Connection error";
-      }
-    }
-
-    loadStatus();
-    setInterval(loadStatus, 10000);
-  </script>
+load();
+setInterval(load, 5000);
+</script>
 
 </body>
 </html>
