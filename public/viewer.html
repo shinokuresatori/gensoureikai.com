@@ -5,40 +5,102 @@
 <title>DDS - Dimension Development System</title>
 <style>
 body {
-  background: #0b0e14;
-  color: #e6e6eb;
-  font-family: system-ui, sans-serif;
-  padding: 40px;
+  background:#0b0e14;
+  color:#e6e6eb;
+  font-family:system-ui,sans-serif;
+  padding:30px;
 }
-h1 {
-  letter-spacing: 0.2em;
+h1,h2 {
+  letter-spacing:0.15em;
 }
-#content {
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid #444;
-  background: #111522;
-  min-height: 120px;
+#today {
+  border:1px solid #444;
+  padding:20px;
+  background:#111522;
+  margin-bottom:30px;
+  min-height:80px;
+}
+.calendar {
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:6px;
+}
+.day {
+  border:1px solid #333;
+  padding:10px;
+  min-height:60px;
+  cursor:pointer;
+}
+.day.has {
+  background:#1a2340;
+}
+.day.today {
+  outline:2px solid #6fa8ff;
+}
+#detail {
+  margin-top:20px;
+  white-space:pre-wrap;
 }
 </style>
 </head>
 <body>
 
 <h1>本日の記録</h1>
-<div id="content">読み込み中…</div>
+<div id="today">読み込み中…</div>
+
+<h2>記録カレンダー</h2>
+<div class="calendar" id="calendar"></div>
+
+<div id="detail"></div>
 
 <script>
-async function load() {
-  const res = await fetch("/api/data");
-  const data = await res.json();
+let DATA = {};
 
-  const today = new Date().toISOString().slice(0,10);
-  document.getElementById("content").textContent =
-    data[today] || "記録は存在しません";
+function getTodayJST() {
+  const d = new Date();
+  d.setHours(d.getHours() + 9);
+  return d.toISOString().slice(0,10);
 }
 
-load();
-setInterval(load, 5000);
+async function loadData() {
+  const res = await fetch("/api/data");
+  DATA = await res.json();
+  render();
+}
+
+function render() {
+  const todayKey = getTodayJST();
+  document.getElementById("today").textContent =
+    DATA[todayKey] || "本日の記録は存在しません";
+
+  const cal = document.getElementById("calendar");
+  cal.innerHTML = "";
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const last = new Date(year, month + 1, 0).getDate();
+
+  for (let d = 1; d <= last; d++) {
+    const key = `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const div = document.createElement("div");
+    div.className = "day";
+    div.textContent = d;
+
+    if (DATA[key]) div.classList.add("has");
+    if (key === todayKey) div.classList.add("today");
+
+    div.onclick = () => {
+      document.getElementById("detail").textContent =
+        `【${key}】\n\n` + (DATA[key] || "記録なし");
+    };
+
+    cal.appendChild(div);
+  }
+}
+
+loadData();
+setInterval(loadData, 5000);
 </script>
 
 </body>
