@@ -3,41 +3,23 @@ const cors = require("cors");
 const path = require("path");
 
 const app = express();
-
-// ===== middleware =====
 app.use(cors());
 app.use(express.json());
 
-// ===== 状態保存 =====
-let currentStatus = {
-  message: "System initialized.",
-  updatedAt: new Date().toISOString()
-};
+// 静的ファイル
+app.use(express.static("public"));
 
-// ===== API =====
-
-// viewer 用
-app.get("/status", (req, res) => {
-  res.json(currentStatus);
-});
-
-// admin 用（更新）
-app.post("/status", (req, res) => {
-  const { message } = req.body;
-
-  if (typeof message !== "string" || message.trim() === "") {
-    return res.status(400).json({ error: "Invalid message" });
-  }
-
-  currentStatus = {
-    message,
-    updatedAt: new Date().toISOString()
-  };
-
-  res.json({ success: true });
-});
-
-// ===== viewer ページ =====
+// viewer
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "viewer.html"));
+  res.sendFile(path.join(__dirname, "public", "viewer.html"));
+});
+
+// admin（仮：あとで鍵付きにする）
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log("Listening on " + PORT);
 });
