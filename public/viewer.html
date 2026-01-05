@@ -4,69 +4,140 @@
 <meta charset="UTF-8">
 <title>DDS - Dimension Development System</title>
 <style>
+/* ====== 基本スタイル（モノクロ・等幅） ====== */
 body {
-  background:#0b0e14;
-  color:#e6e6eb;
-  font-family:system-ui,sans-serif;
+  background:#000;
+  color:#e0e0e0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   padding:30px;
 }
 h1,h2 {
-  letter-spacing:0.15em;
+  letter-spacing:0.25em;
+  font-weight:normal;
+  position:relative;
 }
+
+/* 見出し装飾ライン */
+h1::before, h2::before {
+  content:"┏━━━━━━━━━━━━━━━━━━━━━━┓";
+  display:block;
+  color:#555;
+  margin-bottom:6px;
+}
+h1::after, h2::after {
+  content:"┗━━━━━━━━━━━━━━━━━━━━━━┛";
+  display:block;
+  color:#555;
+  margin-top:6px;
+}
+
 #today {
-  border:1px solid #444;
+  border:1px solid #555;
   padding:20px;
-  background:#111522;
+  background:#050505;
   margin-bottom:30px;
   min-height:80px;
+  white-space:pre-wrap;
 }
+
+/* 月操作部 */
 .controls {
   display:flex;
   align-items:center;
-  gap:15px;
+  gap:20px;
   margin-bottom:10px;
+  color:#888;
 }
+
+#monthLabel {
+  letter-spacing:0.2em;
+}
+
+/* カレンダー */
 .calendar {
   display:grid;
   grid-template-columns:repeat(7,1fr);
-  gap:6px;
+  gap:2px;
+  border:1px solid #333;
+  padding:4px;
+  background:#020202;
 }
+
+/* 曜日 */
 .weekday {
   text-align:center;
-  font-weight:bold;
-  color:#aaa;
+  font-size:0.85em;
+  color:#666;
+  border-bottom:1px solid #222;
+  padding-bottom:4px;
 }
+
+/* 日付セル */
 .day {
-  border:1px solid #333;
+  border:1px solid #222;
   padding:10px;
   min-height:60px;
   cursor:pointer;
+  background:#010101;
+  position:relative;
 }
-.day.has {
-  background:#1a2340;
+
+/* 記録あり */
+.day.has::after {
+  content:"■";
+  position:absolute;
+  bottom:4px;
+  right:6px;
+  font-size:10px;
+  color:#888;
 }
+
+/* 未来日 */
 .day.future {
-  background:#0d1020;
-  color:#555;
+  color:#444;
 }
+
+/* 今日 */
 .day.today {
-  outline:2px solid #6fa8ff;
+  outline:1px solid #fff;
 }
+
+/* 空白 */
 .empty {
   border:none;
   cursor:default;
 }
+
+/* 詳細表示 */
 #detail {
   margin-top:20px;
-  white-space:pre-wrap;
-  min-height:80px;
-}
-button {
-  background:#1a2340;
-  color:#e6e6eb;
   border:1px solid #444;
-  padding:5px 10px;
+  padding:15px;
+  min-height:80px;
+  white-space:pre-wrap;
+  background:#050505;
+}
+
+/* ボタン */
+button {
+  background:#000;
+  color:#ccc;
+  border:1px solid #444;
+  padding:4px 10px;
   cursor:pointer;
+}
+button:hover {
+  background:#111;
+}
+
+/* ====== 未来日の点滅アニメ ====== */
+@keyframes blinkMask {
+  0%, 50%, 100% { color: #444; transform: translateX(0); }
+  25% { color: #888; transform: translateX(1px); }
+  75% { color: #bbb; transform: translateX(-1px); }
+}
+#detail.future {
+  animation: blinkMask 1s infinite;
 }
 </style>
 </head>
@@ -89,37 +160,42 @@ button {
 <script>
 let DATA = {};
 
+// 今日の日付取得
 function getTodayJST() {
   const d = new Date();
   d.setHours(d.getHours() + 9);
   return d.toISOString().slice(0,10);
 }
 
+// 表示中の年月
 let viewYear, viewMonth;
 
+// 未来日伏せ字
 function mask(text) {
   return "▓".repeat(Math.max(10, text.length));
 }
 
+// データ取得
 async function loadData() {
-  const res = await fetch("/api/data");
-  DATA = await res.json();
-  render();
+  try {
+    const res = await fetch("/api/data");
+    DATA = await res.json();
+    render();
+  } catch(e) {
+    console.error(e);
+    document.getElementById("today").textContent = "データ取得エラー";
+  }
 }
 
+// 月移動
 function changeMonth(diff) {
   viewMonth += diff;
-  if (viewMonth < 0) {
-    viewMonth = 11;
-    viewYear--;
-  }
-  if (viewMonth > 11) {
-    viewMonth = 0;
-    viewYear++;
-  }
+  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
   render();
 }
 
+// カレンダー描画
 function render() {
   const todayKey = getTodayJST();
 
@@ -169,12 +245,14 @@ function render() {
     if (key === todayKey) div.classList.add("today");
 
     div.onclick = () => {
+      const detailDiv = document.getElementById("detail");
       if (hasData) {
-        document.getElementById("detail").textContent =
-          `【${key}】\n\n` + (isFuture ? mask(DATA[key]) : DATA[key]);
+        detailDiv.textContent = `【${key}】\n\n` + (isFuture ? mask(DATA[key]) : DATA[key]);
+        if (isFuture) detailDiv.classList.add("future");
+        else detailDiv.classList.remove("future");
       } else {
-        document.getElementById("detail").textContent =
-          `【${key}】\n\n記録なし`;
+        detailDiv.textContent = `【${key}】\n\n記録なし`;
+        detailDiv.classList.remove("future");
       }
     };
 
