@@ -47,6 +47,7 @@ h1::after, h2::after, h3::after {
   padding:10px;
   text-align:center;
   position:relative;
+  cursor:pointer;
 }
 
 .arg-card img {
@@ -117,8 +118,6 @@ h1::after, h2::after, h3::after {
   border:1px solid #222;
   padding:10px;
   min-height:60px;
-  cursor:pointer;
-  background:#010101;
   position:relative;
   transition: all 0.2s;
 }
@@ -133,11 +132,8 @@ h1::after, h2::after, h3::after {
 }
 
 .day.future { color:#444; }
-
 .day.today { outline:1px solid #fff; }
-
 .day.selected { outline:2px solid #6fa8ff; }
-
 .empty { border:none; cursor:default; }
 
 #detail {
@@ -184,23 +180,23 @@ h1::after, h2::after, h3::after {
 <script>
 let DATA = {};
 let selectedDiv = null;
-
-// ローカル画像を使用
 const DUMMY_IMG = "./dummy.png";
 
+// ARG データ（id 付き）
 const ARG_DATA = {
   investigation: [
-    { title:"ARG-α", status:"調査中", thumbnail:DUMMY_IMG, url:"#"},
-    { title:"ARG-β", status:"完了", thumbnail:DUMMY_IMG, url:"#"}
+    { id:"investigation_ARG-α", title:"ARG-α", status:"調査中", thumbnail:DUMMY_IMG, url:"#"},
+    { id:"investigation_ARG-β", title:"ARG-β", status:"完了", thumbnail:DUMMY_IMG, url:"#"}
   ],
   realtime: [
-    { title:"ARG-γ", status:"進行中", thumbnail:DUMMY_IMG, url:"#"}
+    { id:"realtime_ARG-γ", title:"ARG-γ", status:"進行中", thumbnail:DUMMY_IMG, url:"#"}
   ],
   onsale: [
-    { title:"ARG-δ", status:"販売中", thumbnail:DUMMY_IMG, url:"#"}
+    { id:"onsale_ARG-δ", title:"ARG-δ", status:"販売中", thumbnail:DUMMY_IMG, url:"#"}
   ]
 };
 
+// ARGカード描画
 function renderARG() {
   ["investigation","realtime","onsale"].forEach(section => {
     const container = document.getElementById(section);
@@ -208,114 +204,92 @@ function renderARG() {
     ARG_DATA[section].forEach(arg => {
       const card = document.createElement("div");
       card.className = "arg-card";
+      card.id = arg.id;
       card.innerHTML = `
         <img src="${arg.thumbnail}" alt="${arg.title}">
         <div class="arg-status">${arg.status}</div>
         <div class="arg-title">${arg.title}</div>
         <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
       `;
+      card.onclick = () => showDetail(arg);
       container.appendChild(card);
     });
   });
 }
 
-function getTodayJST() {
-  const d = new Date();
-  d.setHours(d.getHours() + 9);
-  return d.toISOString().slice(0,10);
+// 詳細表示
+function showDetail(arg) {
+  if(selectedDiv) selectedDiv.classList.remove("selected");
+  const cardDiv = document.getElementById(arg.id);
+  cardDiv.classList.add("selected");
+  selectedDiv = cardDiv;
+
+  const detailDiv = document.getElementById("detail");
+  detailDiv.textContent = `【${arg.title}】\n\nステータス: ${arg.status}`;
+  detailDiv.classList.remove("future");
 }
 
+// URLパラメータでARG自動選択
+function handleURLParam() {
+  const params = new URLSearchParams(window.location.search);
+  const argId = params.get("arg");
+  if(!argId) return;
+
+  for(const section in ARG_DATA) {
+    const arg = ARG_DATA[section].find(a => a.id === argId);
+    if(arg) {
+      showDetail(arg);
+      document.getElementById(section).scrollIntoView({behavior:"smooth"});
+      break;
+    }
+  }
+}
+
+// カレンダー関係は従来コード
+function getTodayJST() { const d = new Date(); d.setHours(d.getHours() + 9); return d.toISOString().slice(0,10); }
 let viewYear, viewMonth;
-
 function mask(text) { return "▓".repeat(Math.max(10, text.length)); }
-
 async function loadData() {
   try {
     const res = await fetch("/api/data");
     DATA = await res.json();
     render();
     renderARG();
-  } catch(e) {
-    console.error(e);
-    document.getElementById("today").textContent = "データ取得エラー";
-  }
+    handleURLParam();
+  } catch(e) { console.error(e); document.getElementById("today").textContent = "データ取得エラー"; }
 }
-
-function changeMonth(diff) {
-  viewMonth += diff;
-  if (viewMonth < 0) { viewMonth = 11; viewYear--; }
-  if (viewMonth > 11) { viewMonth = 0; viewYear++; }
-  render();
-}
-
+function changeMonth(diff) { viewMonth+=diff; if(viewMonth<0){viewMonth=11;viewYear--;} if(viewMonth>11){viewMonth=0;viewYear++;} render(); }
 function render() {
   const todayKey = getTodayJST();
-  document.getElementById("today").textContent =
-    DATA[todayKey] || "本日の記録は存在しません";
-
-  document.getElementById("monthLabel").textContent =
-    `${viewYear}年 ${viewMonth + 1}月`;
-
-  const cal = document.getElementById("calendar");
-  cal.innerHTML = "";
-
-  const weekdays = ["日","月","火","水","木","金","土"];
-  weekdays.forEach(w => {
-    const div = document.createElement("div");
-    div.className = "weekday";
-    div.textContent = w;
-    cal.appendChild(div);
-  });
-
-  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
-  for (let i = 0; i < firstDay; i++) {
-    const empty = document.createElement("div");
-    empty.className = "empty";
-    cal.appendChild(empty);
-  }
-
-  const last = new Date(viewYear, viewMonth + 1, 0).getDate();
-  for (let d = 1; d <= last; d++) {
-    const key = `${viewYear}-${String(viewMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-    const div = document.createElement("div");
-    div.className = "day";
-    div.textContent = d;
-
-    const isFuture = key > todayKey;
-    const hasData = DATA[key];
-
-    if (hasData) div.classList.add("has");
-    if (isFuture) div.classList.add("future");
-    if (key === todayKey) div.classList.add("today");
-
-    div.onclick = () => {
-      if (selectedDiv) selectedDiv.classList.remove("selected");
-      div.classList.add("selected");
-      selectedDiv = div;
-
-      const detailDiv = document.getElementById("detail");
-      if (hasData) {
-        detailDiv.textContent = `【${key}】\n\n` + (isFuture ? mask(DATA[key]) : DATA[key]);
-        if (isFuture) detailDiv.classList.add("future");
-        else detailDiv.classList.remove("future");
-      } else {
-        detailDiv.textContent = `【${key}】\n\n記録なし`;
-        detailDiv.classList.remove("future");
-      }
+  document.getElementById("today").textContent = DATA[todayKey]||"本日の記録は存在しません";
+  document.getElementById("monthLabel").textContent = `${viewYear}年 ${viewMonth+1}月`;
+  const cal = document.getElementById("calendar"); cal.innerHTML="";
+  ["日","月","火","水","木","金","土"].forEach(w=>{const div=document.createElement("div");div.className="weekday";div.textContent=w;cal.appendChild(div);});
+  const firstDay=new Date(viewYear,viewMonth,1).getDay();
+  for(let i=0;i<firstDay;i++){const empty=document.createElement("div");empty.className="empty";cal.appendChild(empty);}
+  const last=new Date(viewYear,viewMonth+1,0).getDate();
+  for(let d=1;d<=last;d++){
+    const key=`${viewYear}-${String(viewMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const div=document.createElement("div"); div.className="day"; div.textContent=d;
+    const isFuture=key>todayKey; const hasData=DATA[key];
+    if(hasData) div.classList.add("has"); if(isFuture) div.classList.add("future"); if(key===todayKey) div.classList.add("today");
+    div.onclick=()=>{if(selectedDiv)selectedDiv.classList.remove("selected");div.classList.add("selected");selectedDiv=div;
+      const detailDiv=document.getElementById("detail");
+      if(hasData){detailDiv.textContent=`【${key}】\n\n`+(isFuture?mask(DATA[key]):DATA[key]); if(isFuture) detailDiv.classList.add("future"); else detailDiv.classList.remove("future");}
+      else{detailDiv.textContent=`【${key}】\n\n記録なし`; detailDiv.classList.remove("future");}
     };
-
     cal.appendChild(div);
   }
 }
 
-(function init() {
-  const now = new Date();
-  viewYear = now.getFullYear();
-  viewMonth = now.getMonth();
+// 初期化
+(function init(){
+  const now=new Date(); viewYear=now.getFullYear(); viewMonth=now.getMonth();
   loadData();
-  setInterval(loadData, 5000);
+  renderARG();
+  handleURLParam();
+  setInterval(loadData,5000);
 })();
 </script>
-
 </body>
 </html>
