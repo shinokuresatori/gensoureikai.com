@@ -351,6 +351,46 @@ function renderARG(){
 }
 renderARG();
 </script>
+<script>
+/* ===== カレンダー描画（最小・UI非変更） ===== */
+(function(){
+  const cal = document.getElementById("calendar");
+  if(!cal) return;
+
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth(); // 0-based
+
+  const weekdays = ["日","月","火","水","木","金","土"];
+
+  // 曜日ヘッダ
+  weekdays.forEach(w=>{
+    const d = document.createElement("div");
+    d.className = "weekday";
+    d.textContent = w;
+    cal.appendChild(d);
+  });
+
+  // 月初の曜日
+  const firstDay = new Date(year, month, 1).getDay();
+  for(let i=0;i<firstDay;i++){
+    const e = document.createElement("div");
+    e.className = "day";
+    e.style.visibility = "hidden";
+    cal.appendChild(e);
+  }
+
+  // 月の日数
+  const lastDate = new Date(year, month + 1, 0).getDate();
+
+  for(let d=1; d<=lastDate; d++){
+    const cell = document.createElement("div");
+    cell.className = "day";
+    cell.textContent = d;
+    cal.appendChild(cell);
+  }
+})();
+</script>
 
 </body>
 </html>
