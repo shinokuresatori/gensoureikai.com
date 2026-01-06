@@ -5,10 +5,10 @@ const fs = require("fs");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// 🔐 管理者鍵（RenderのEnvironment Variables）
+// ===== ENV =====
 const ADMIN_KEY = process.env.ADMIN_KEY;
 
-// ===== 保存ファイル =====
+// ===== DATA =====
 const DATA_FILE = path.join(__dirname, "data.json");
 
 // ===== middleware =====
@@ -27,10 +27,10 @@ function saveData(data) {
 
 // ===== viewer =====
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "viewer.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// ===== admin 認証 =====
+// ===== admin login =====
 app.post("/api/admin-login", (req, res) => {
   const { key } = req.body;
 
@@ -45,16 +45,16 @@ app.post("/api/admin-login", (req, res) => {
   }
 });
 
-// ===== admin 保存（🔐鍵必須）=====
+// ===== admin save =====
 app.post("/api/save", (req, res) => {
   const { key, date, detail } = req.body;
 
   if (key !== ADMIN_KEY) {
-    return res.status(403).json({ error: "INVALID ADMIN KEY" });
+    return res.status(403).json({ error: "INVALID KEY" });
   }
 
   if (!date || !detail) {
-    return res.status(400).json({ error: "Invalid data" });
+    return res.status(400).json({ error: "INVALID DATA" });
   }
 
   const data = loadData();
@@ -64,14 +64,9 @@ app.post("/api/save", (req, res) => {
   res.json({ ok: true });
 });
 
-// ===== viewer 読み取り =====
+// ===== viewer load =====
 app.get("/api/data", (req, res) => {
   res.json(loadData());
-});
-
-// ===== admin URL 直アクセス抑止（思想A）=====
-app.get("/admin", (req, res) => {
-  res.status(403).send("Forbidden");
 });
 
 // ===== start =====
