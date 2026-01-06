@@ -5,15 +5,25 @@ const fs = require("fs");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// 🔐 管理者鍵（Renderの環境変数で設定）
+// 🔐 管理者鍵（RenderのEnvironment Variables）
 const ADMIN_KEY = process.env.ADMIN_KEY;
 
-// データ保存ファイル
-const DATA_FILE = "data.json";
+// ===== 保存ファイル =====
+const DATA_FILE = path.join(__dirname, "data.json");
 
-// ===== ミドルウェア =====
+// ===== middleware =====
 app.use(express.json());
 app.use(express.static("public"));
+
+// ===== util =====
+function loadData() {
+  if (!fs.existsSync(DATA_FILE)) return {};
+  return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+}
+
+function saveData(data) {
+  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+}
 
 // ===== viewer =====
 app.get("/", (req, res) => {
@@ -35,41 +45,36 @@ app.post("/api/admin-login", (req, res) => {
   }
 });
 
-// ===== 予定データ保存 =====
+// ===== admin 保存（🔐鍵必須）=====
 app.post("/api/save", (req, res) => {
-  const { date, detail } = req.body;
+  const { key, date, detail } = req.body;
+
+  if (key !== ADMIN_KEY) {
+    return res.status(403).json({ error: "INVALID ADMIN KEY" });
+  }
 
   if (!date || !detail) {
     return res.status(400).json({ error: "Invalid data" });
   }
 
-  let data = {};
-  if (fs.existsSync(DATA_FILE)) {
-    data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-  }
-
+  const data = loadData();
   data[date] = detail;
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+  saveData(data);
 
   res.json({ ok: true });
 });
 
-// ===== 予定データ取得 =====
+// ===== viewer 読み取り =====
 app.get("/api/data", (req, res) => {
-  if (!fs.existsSync(DATA_FILE)) {
-    return res.json({});
-  }
-
-  const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-  res.json(data);
+  res.json(loadData());
 });
 
-// ===== 不正 admin 直アクセス防止 =====
+// ===== admin URL 直アクセス抑止（思想A）=====
 app.get("/admin", (req, res) => {
   res.status(403).send("Forbidden");
 });
 
-// ===== サーバー起動 =====
+// ===== start =====
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`BPS CORE running on port ${PORT}`);
 });
