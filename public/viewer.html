@@ -1,103 +1,204 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<title>Viewer</title>
-<!-- Noto Serif JP フォント読み込み -->
+<meta charset="utf-8">
+<title>BPS | Boundary Processing System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
-body {
-  background:#000;
-  color:#e0e0e0;
-  font-family:'Noto Serif JP', serif;
-  padding:30px;
+/* ===== CORE ===== */
+:root{
+  --bg:#0a0a0a;
+  --panel:#101010;
+  --line:#2a2a2a;
+  --text:#cfcfcf;
+  --sub:#7a7a7a;
+  --alert:#a33;
 }
 
-h1,h2,h3 {
-  letter-spacing:0.25em;
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Consolas,monospace;
+  font-size:13px;
+  letter-spacing:.08em;
+}
+
+/* ===== LAYOUT ===== */
+.wrapper{
+  display:flex;
+  min-height:100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:240px;
+  border-right:1px solid var(--line);
+  background:#080808;
+  padding:16px 14px;
+}
+
+.sidebar h1{
+  font-size:11px;
   font-weight:normal;
-  position:relative;
+  color:var(--sub);
+  margin:0 0 16px;
 }
 
-h1::before, h2::before, h3::before {
+.tool-group{
+  margin-bottom:24px;
+}
+
+.tool-group h2{
+  font-size:10px;
+  font-weight:normal;
+  color:#666;
+  margin:0 0 8px;
+}
+
+.tool-btn{
+  display:block;
+  width:100%;
+  padding:8px 10px;
+  margin-bottom:6px;
+  background:#000;
+  border:1px solid var(--line);
+  color:var(--text);
+  font-family:inherit;
+  font-size:11px;
+  text-align:left;
+  cursor:pointer;
+}
+
+.tool-btn:hover{background:#111}
+
+.tool-btn.alert{
+  border-color:var(--alert);
+  color:#ffb3b3;
+}
+
+/* ===== MAIN ===== */
+.main{flex:1}
+
+/* ===== HEADER ===== */
+header{
+  border-bottom:1px solid var(--line);
+  padding:10px 24px;
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:var(--sub);
+}
+
+/* ===== CONTENT ===== */
+main{
+  max-width:1200px;
+  margin:24px auto;
+  padding:0 24px;
+}
+
+.panel{
+  position:relative;
+  background:var(--panel);
+  border:1px solid var(--line);
+  padding:18px;
+  margin-bottom:24px;
+}
+
+.panel::before,.panel::after{
+  content:"";
+  position:absolute;
+  width:10px;height:10px;
+}
+.panel::before{
+  top:-1px;left:-1px;
+  border-top:1px solid var(--text);
+  border-left:1px solid var(--text);
+}
+.panel::after{
+  bottom:-1px;right:-1px;
+  border-bottom:1px solid var(--text);
+  border-right:1px solid var(--text);
+}
+
+h2{
+  font-size:11px;
+  font-weight:normal;
+  color:var(--sub);
+  margin:0 0 12px;
+}
+
+/* ===== Viewer ===== */
+.viewer{
+  font-family:'Noto Serif JP',serif;
+  letter-spacing:.25em;
+  color:#e0e0e0;
+}
+
+.viewer h3{
+  font-weight:normal;
+  margin-top:30px;
+}
+
+.viewer h3::before{
   content:"┏━━━━━━━━━━━━━━━━━━━━━━┓";
   display:block;
   color:#555;
   margin-bottom:6px;
 }
-h1::after, h2::after, h3::after {
+.viewer h3::after{
   content:"┗━━━━━━━━━━━━━━━━━━━━━━┛";
   display:block;
   color:#555;
   margin-top:6px;
 }
 
-.section { margin-bottom:30px; }
-
-.arg-list {
+.arg-list{
   display:flex;
   gap:20px;
-  flex-wrap: wrap;
+  flex-wrap:wrap;
 }
 
-.arg-card {
+.arg-card{
   background:#050505;
   border:1px solid #555;
   width:180px;
   padding:10px;
   text-align:center;
   position:relative;
-  cursor:pointer;
 }
 
-.arg-card img {
+.arg-card img{
   width:100%;
-  height:auto;
-  display:block;
   margin-bottom:6px;
 }
 
-.arg-status {
+.arg-status{
   position:absolute;
   top:6px;
   right:6px;
   background:#6fa8ff;
   color:#000;
-  font-size:0.7em;
+  font-size:.7em;
   padding:2px 4px;
-  border-radius:4px;
 }
 
-.arg-title { font-weight:bold; margin-bottom:6px; }
+.arg-title{font-weight:bold;margin-bottom:6px;}
 
-.arg-link button {
+.arg-link button{
   background:#000;
   color:#ccc;
   border:1px solid #444;
   padding:4px 8px;
-  cursor:pointer;
-}
-.arg-link button:hover { background:#111; }
-
-#today, #realtime, #onsale, #investigation {
-  border:1px solid #555;
-  padding:20px;
-  background:#050505;
-  min-height:80px;
-  white-space:pre-wrap;
 }
 
-.controls {
-  display:flex;
-  align-items:center;
-  gap:20px;
-  margin-bottom:10px;
-  color:#888;
-}
-
-#monthLabel { letter-spacing:0.2em; }
-
-.calendar {
+/* calendar */
+.calendar{
   display:grid;
   grid-template-columns:repeat(7,1fr);
   gap:2px;
@@ -105,191 +206,151 @@ h1::after, h2::after, h3::after {
   padding:4px;
   background:#020202;
 }
-
-.weekday {
+.weekday{
   text-align:center;
-  font-size:0.85em;
+  font-size:.8em;
   color:#666;
-  border-bottom:1px solid #222;
-  padding-bottom:4px;
 }
-
-.day {
+.day{
   border:1px solid #222;
-  padding:10px;
-  min-height:60px;
-  position:relative;
-  transition: all 0.2s;
+  padding:8px;
+  min-height:50px;
 }
-
-.day.has::after {
+.day.has::after{
   content:"■";
-  position:absolute;
-  bottom:4px;
-  right:6px;
+  float:right;
   font-size:10px;
   color:#888;
 }
 
-.day.future { color:#444; }
-.day.today { outline:1px solid #fff; }
-.day.selected { outline:2px solid #6fa8ff; }
-.empty { border:none; cursor:default; }
-
-#detail {
+#detail{
   margin-top:20px;
   border:1px solid #444;
   padding:15px;
-  min-height:80px;
-  white-space:pre-wrap;
   background:#050505;
+  white-space:pre-wrap;
 }
-
-@keyframes blinkMask {
-  0%, 50%, 100% { color: #444; transform: translateX(0); }
-  25% { color: #888; transform: translateX(1px); }
-  75% { color: #bbb; transform: translateX(-1px); }
-}
-#detail.future { animation: blinkMask 1s infinite; }
 </style>
 </head>
+
 <body>
 
-<h1>調査中のARG</h1>
-<div class="arg-list" id="investigation"></div>
+<div class="wrapper">
 
-<h1>本日の記録</h1>
-<div id="today">読み込み中…</div>
+<!-- ===== LEFT TOOL PANEL ===== -->
+<aside class="sidebar">
+  <h1>BPS CORE</h1>
 
-<h1>今開催中のリアルタイムARG</h1>
-<div class="arg-list" id="realtime"></div>
+  <div class="tool-group">
+    <h2>ACCOUNT</h2>
+    <button class="tool-btn">LOGIN</button>
+    <button class="tool-btn">ACCOUNT STATUS</button>
+    <button class="tool-btn">CLEAR SESSION</button>
+  </div>
 
-<h1>販売中のARG</h1>
-<div class="arg-list" id="onsale"></div>
+  <div class="tool-group">
+    <h2>TOOLS</h2>
+    <button class="tool-btn">CASE INDEX</button>
+    <button class="tool-btn">SIGNAL MONITOR</button>
+    <button class="tool-btn">ARCHIVE VIEWER</button>
+    <button class="tool-btn">TRACE ANALYSIS</button>
+  </div>
 
-<h1>記録カレンダー</h1>
-<div class="controls">
-  <button onclick="changeMonth(-1)">◀</button>
-  <div id="monthLabel"></div>
-  <button onclick="changeMonth(1)">▶</button>
+  <div class="tool-group">
+    <h2>SYSTEM</h2>
+    <button class="tool-btn alert">EMERGENCY LOCK</button>
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+
+<header>
+  <div>SYSTEM ID : BPS-CORE-α</div>
+  <div>BUILD 0.41 / CHECKSUM 9F2A</div>
+</header>
+
+<main>
+  <div class="panel">
+    <h2>CASE_014 / OBSERVATION MODULE</h2>
+
+    <div class="viewer">
+      <h3>調査中のARG</h3>
+      <div class="arg-list" id="investigation"></div>
+
+      <h3>本日の記録</h3>
+      <div id="today">読み込み中…</div>
+
+      <h3>今開催中のリアルタイムARG</h3>
+      <div class="arg-list" id="realtime"></div>
+
+      <h3>販売中のARG</h3>
+      <div class="arg-list" id="onsale"></div>
+
+      <h3>記録カレンダー</h3>
+      <div class="calendar" id="calendar"></div>
+      <div id="detail"></div>
+    </div>
+  </div>
+</main>
+
+</div>
 </div>
 
-<div class="calendar" id="calendar"></div>
-<div id="detail"></div>
-
 <script>
-let DATA = {};
-let selectedDiv = null;
-const DUMMY_IMG = "./dummy.png";
+/* ===============================
+   ARG 連携受信・保存ロジック
+   UI・挙動は一切変更しない
+=============================== */
+(function(){
+  const params = new URLSearchParams(location.search);
+  const token = params.get("connect");
+  if(!token) return;
 
-// ARG データ（id 付き）
-const ARG_DATA = {
-  investigation: [
-    { id:"investigation_ARG-α", title:"ARG-α", status:"調査中", thumbnail:DUMMY_IMG, url:"#"},
-    { id:"investigation_ARG-β", title:"ARG-β", status:"完了", thumbnail:DUMMY_IMG, url:"#"}
-  ],
-  realtime: [
-    { id:"realtime_ARG-γ", title:"ARG-γ", status:"進行中", thumbnail:DUMMY_IMG, url:"#"}
-  ],
-  onsale: [
-    { id:"onsale_ARG-δ", title:"ARG-δ", status:"販売中", thumbnail:DUMMY_IMG, url:"#"}
-  ]
+  const storeKey = "bps_linked_args";
+  const linked =
+    JSON.parse(localStorage.getItem(storeKey) || "{}");
+
+  if(!linked[token]){
+    linked[token] = {
+      connectedAt: new Date().toISOString(),
+      status: "linked"
+    };
+    localStorage.setItem(storeKey, JSON.stringify(linked));
+    console.log("[BPS] External ARG linked:", token);
+  }
+
+  /* URLを静かに消去 */
+  history.replaceState(null,"",location.pathname);
+})();
+
+/* ===== Viewerダミー描画 ===== */
+const DUMMY_IMG="./dummy.png";
+const ARG_DATA={
+  investigation:[{id:"A1",title:"ARG-α",status:"調査中",thumbnail:DUMMY_IMG}],
+  realtime:[{id:"B1",title:"ARG-β",status:"進行中",thumbnail:DUMMY_IMG}],
+  onsale:[{id:"C1",title:"ARG-γ",status:"販売中",thumbnail:DUMMY_IMG}]
 };
 
-// ARGカード描画
-function renderARG() {
-  ["investigation","realtime","onsale"].forEach(section => {
-    const container = document.getElementById(section);
-    container.innerHTML = "";
-    ARG_DATA[section].forEach(arg => {
-      const card = document.createElement("div");
-      card.className = "arg-card";
-      card.id = arg.id;
-      card.innerHTML = `
-        <img src="${arg.thumbnail}" alt="${arg.title}">
-        <div class="arg-status">${arg.status}</div>
-        <div class="arg-title">${arg.title}</div>
-        <div class="arg-link"><button onclick="window.open('${arg.url}','_blank')">サイトへ</button></div>
+function renderARG(){
+  ["investigation","realtime","onsale"].forEach(sec=>{
+    const el=document.getElementById(sec);
+    el.innerHTML="";
+    ARG_DATA[sec].forEach(a=>{
+      const c=document.createElement("div");
+      c.className="arg-card";
+      c.innerHTML=`
+        <img src="${a.thumbnail}">
+        <div class="arg-status">${a.status}</div>
+        <div class="arg-title">${a.title}</div>
+        <div class="arg-link"><button>OPEN</button></div>
       `;
-      card.onclick = () => showDetail(arg);
-      container.appendChild(card);
+      el.appendChild(c);
     });
   });
 }
-
-// 詳細表示
-function showDetail(arg) {
-  if(selectedDiv) selectedDiv.classList.remove("selected");
-  const cardDiv = document.getElementById(arg.id);
-  cardDiv.classList.add("selected");
-  selectedDiv = cardDiv;
-
-  const detailDiv = document.getElementById("detail");
-  detailDiv.textContent = `【${arg.title}】\n\nステータス: ${arg.status}`;
-  detailDiv.classList.remove("future");
-}
-
-// URLパラメータでARG自動選択
-function handleURLParam() {
-  const params = new URLSearchParams(window.location.search);
-  const argId = params.get("arg");
-  if(!argId) return;
-
-  for(const section in ARG_DATA) {
-    const arg = ARG_DATA[section].find(a => a.id === argId);
-    if(arg) {
-      showDetail(arg);
-      document.getElementById(section).scrollIntoView({behavior:"smooth"});
-      break;
-    }
-  }
-}
-
-// カレンダー関係は従来コード
-function getTodayJST() { const d = new Date(); d.setHours(d.getHours() + 9); return d.toISOString().slice(0,10); }
-let viewYear, viewMonth;
-function mask(text) { return "▓".repeat(Math.max(10, text.length)); }
-async function loadData() {
-  try {
-    const res = await fetch("/api/data");
-    DATA = await res.json();
-    render();
-    renderARG();
-    handleURLParam();
-  } catch(e) { console.error(e); document.getElementById("today").textContent = "データ取得エラー"; }
-}
-function changeMonth(diff) { viewMonth+=diff; if(viewMonth<0){viewMonth=11;viewYear--;} if(viewMonth>11){viewMonth=0;viewYear++;} render(); }
-function render() {
-  const todayKey = getTodayJST();
-  document.getElementById("today").textContent = DATA[todayKey]||"本日の記録は存在しません";
-  document.getElementById("monthLabel").textContent = `${viewYear}年 ${viewMonth+1}月`;
-  const cal = document.getElementById("calendar"); cal.innerHTML="";
-  ["日","月","火","水","木","金","土"].forEach(w=>{const div=document.createElement("div");div.className="weekday";div.textContent=w;cal.appendChild(div);});
-  const firstDay=new Date(viewYear,viewMonth,1).getDay();
-  for(let i=0;i<firstDay;i++){const empty=document.createElement("div");empty.className="empty";cal.appendChild(empty);}
-  const last=new Date(viewYear,viewMonth+1,0).getDate();
-  for(let d=1;d<=last;d++){
-    const key=`${viewYear}-${String(viewMonth+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-    const div=document.createElement("div"); div.className="day"; div.textContent=d;
-    const isFuture=key>todayKey; const hasData=DATA[key];
-    if(hasData) div.classList.add("has"); if(isFuture) div.classList.add("future"); if(key===todayKey) div.classList.add("today");
-    div.onclick=()=>{if(selectedDiv)selectedDiv.classList.remove("selected");div.classList.add("selected");selectedDiv=div;
-      const detailDiv=document.getElementById("detail");
-      if(hasData){detailDiv.textContent=`【${key}】\n\n`+(isFuture?mask(DATA[key]):DATA[key]); if(isFuture) detailDiv.classList.add("future"); else detailDiv.classList.remove("future");}
-      else{detailDiv.textContent=`【${key}】\n\n記録なし`; detailDiv.classList.remove("future");}
-    };
-    cal.appendChild(div);
-  }
-}
-
-// 初期化
-(function init(){
-  const now=new Date(); viewYear=now.getFullYear(); viewMonth=now.getMonth();
-  loadData();
-  renderARG();
-  handleURLParam();
-  setInterval(loadData,5000);
-})();
+renderARG();
 </script>
+
 </body>
 </html>
