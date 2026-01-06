@@ -158,7 +158,9 @@ h2{
   color:#ccc;
   border:1px solid #444;
   padding:4px 8px;
+  cursor:pointer;
 }
+.arg-link button:hover{background:#111}
 
 /* ===== CALENDAR ===== */
 .calendar{
@@ -246,17 +248,17 @@ h2{
   <div class="arg-list" id="investigation"></div>
 
   <h3>本日の記録</h3>
-  <div id="today"></div>
+  <div id="today">※リアルタイムARG未開催の場合は空欄</div>
 
   <h3>今開催中のリアルタイムARG</h3>
-  <div class="arg-list" id="realtime"></div>
+  <div class="arg-list" id="realtime">※リアルタイムARG未開催の場合は空欄</div>
 
   <h3>販売中のARG</h3>
   <div class="arg-list" id="onsale"></div>
 
   <h3>記録カレンダー</h3>
   <div class="calendar" id="calendar"></div>
-  <div id="detail"></div>
+  <div id="detail">※日付を選択してください</div>
 </div>
 </div>
 </main>
@@ -264,59 +266,65 @@ h2{
 </div>
 
 <script>
-/* ===== ARG 連携受信 ===== */
-(function(){
-  const p=new URLSearchParams(location.search);
-  const token=p.get("connect");
-  if(!token) return;
-  const k="bps_linked_args";
-  const d=JSON.parse(localStorage.getItem(k)||"{}");
-  if(!d[token]){
-    d[token]={connectedAt:new Date().toISOString()};
-    localStorage.setItem(k,JSON.stringify(d));
+/* ===== ARG 管理 ===== */
+const ARG_STORE = [
+  {
+    title: "集合写真素材ARG",
+    thumbnail: "./dummy.png",
+    guideURL: "https://www.gensoureikai.com/dds/group-photo/ARG1/guide",
+    token: "group-photo-ARG1",
+    realtime: false
   }
-  history.replaceState(null,"",location.pathname);
-})();
+];
 
-/* ===== ARG ダミー ===== */
-const DUMMY_IMG="./dummy.png";
-const ARG_DATA={
-  investigation:[{title:"ARG-α",status:"調査中",thumbnail:DUMMY_IMG}],
-  realtime:[{title:"ARG-β",status:"進行中",thumbnail:DUMMY_IMG}],
-  onsale:[{title:"ARG-γ",status:"販売中",thumbnail:DUMMY_IMG}]
-};
-["investigation","realtime","onsale"].forEach(k=>{
-  const el=document.getElementById(k);
-  ARG_DATA[k].forEach(a=>{
-    el.innerHTML+=`
-      <div class="arg-card">
-        <img src="${a.thumbnail}">
-        <div class="arg-status">${a.status}</div>
-        <div class="arg-title">${a.title}</div>
-        <div class="arg-link"><button>OPEN</button></div>
-      </div>`;
-  });
+// localStorageから購入済みARGトークン取得
+const purchasedTokens = JSON.parse(localStorage.getItem("bps_purchased_args") || "[]");
+
+// 調査中のARG表示
+const investigationEl = document.getElementById("investigation");
+let hasInvestigation = false;
+
+purchasedTokens.forEach(tok => {
+  const arg = ARG_STORE.find(a => a.token === tok);
+  if (!arg) return;
+  hasInvestigation = true;
+
+  const card = document.createElement("div");
+  card.className = "arg-card";
+  card.innerHTML = `
+    <img src="${arg.thumbnail}">
+    <div class="arg-status">調査中</div>
+    <div class="arg-title">${arg.title}</div>
+    <div class="arg-link"><button onclick="window.open('${arg.guideURL}')">OPEN</button></div>
+  `;
+  investigationEl.appendChild(card);
 });
 
-/* ===== CALENDAR（server連携） ===== */
-fetch("/api/data")
-  .then(r=>r.json())
-  .then(DATA=>{
-    buildCalendar(DATA);
-  });
-
-function getTodayJST(){
-  const d=new Date();
-  return d.toISOString().slice(0,10);
-}
-function mask(t){
-  return "▓".repeat(Math.max(10,t.length));
+// 調査中ARGがない場合の表示
+if(!hasInvestigation){
+  investigationEl.textContent = "調査中の事象はありません";
 }
 
-function buildCalendar(DATA){
+/* ===== 販売中ARG表示 ===== */
+const onsaleEl = document.getElementById("onsale");
+ARG_STORE.forEach(arg => {
+  const card = document.createElement("div");
+  card.className = "arg-card";
+  card.innerHTML = `
+    <img src="${arg.thumbnail}">
+    <div class="arg-status">販売中</div>
+    <div class="arg-title">${arg.title}</div>
+    <div class="arg-link"><button onclick="window.open('${arg.guideURL}')">手引き</button></div>
+  `;
+  onsaleEl.appendChild(card);
+});
+
+/* ===== カレンダー固定表示 & 日付クリック ===== */
+function getTodayJST(){return new Date().toISOString().slice(0,10);}
+(function(){
   let selected=null;
   const now=new Date();
-  const y=now.getFullYear(),m=now.getMonth();
+  const y=now.getFullYear(), m=now.getMonth();
   const cal=document.getElementById("calendar");
   const today=getTodayJST();
 
@@ -340,8 +348,6 @@ function buildCalendar(DATA){
     cell.className="day";
     cell.textContent=d;
 
-    if(DATA[key]) cell.classList.add("has");
-    if(key>today) cell.classList.add("future");
     if(key===today) cell.classList.add("today");
 
     cell.onclick=()=>{
@@ -350,17 +356,25 @@ function buildCalendar(DATA){
       selected=cell;
 
       const det=document.getElementById("detail");
-      if(DATA[key]){
-        det.textContent=`【${key}】\n\n`+(key>today?mask(DATA[key]):DATA[key]);
-        det.classList.toggle("future",key>today);
-      }else{
-        det.textContent=`【${key}】\n\n記録なし`;
-        det.classList.remove("future");
-      }
+
+      // 将来的にリアルタイムARGサーバーから取得
+      fetch(`/api/arg-progress?date=${key}`)
+        .then(r=>r.json())
+        .then(data=>{
+          if(data && Object.keys(data).length>0){
+            det.textContent=`【${key}】\n\n` + JSON.stringify(data,null,2);
+          } else {
+            det.textContent=`【${key}】\n\n記録なし`;
+          }
+          det.classList.remove("future");
+        })
+        .catch(e=>{
+          det.textContent=`【${key}】\n\n取得エラー`;
+        });
     };
     cal.appendChild(cell);
   }
-}
+})();
 </script>
 
 </body>
