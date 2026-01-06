@@ -355,5 +355,87 @@ let selected=null;
   }
 })();
 </script>
+<script>
+/* ===============================
+   CALENDAR CORE (viewer)
+=============================== */
+
+const CAL_KEY = "bps_calendar_records";
+const calEl = document.getElementById("calendar");
+const detailEl = document.getElementById("detail");
+
+const today = new Date();
+const year = today.getFullYear();
+const month = today.getMonth();
+
+const records = JSON.parse(localStorage.getItem(CAL_KEY) || "{}");
+
+/* 曜日 */
+["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(d=>{
+  const w=document.createElement("div");
+  w.className="weekday";
+  w.textContent=d;
+  calEl.appendChild(w);
+});
+
+/* 月初調整 */
+const firstDay = new Date(year,month,1).getDay();
+for(let i=0;i<firstDay;i++){
+  calEl.appendChild(document.createElement("div"));
+}
+
+/* 日付生成 */
+const lastDate = new Date(year,month+1,0).getDate();
+
+for(let d=1;d<=lastDate;d++){
+  const cell=document.createElement("div");
+  cell.className="day";
+
+  const dateStr =
+    `${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+
+  cell.textContent=d;
+
+  if(records[dateStr]){
+    cell.classList.add("has");
+
+    /* 未来日演出 */
+    if(new Date(dateStr) > today){
+      cell.style.animation="flicker 1.5s infinite, shake 3s infinite";
+    }
+
+    cell.addEventListener("click",()=>{
+      document
+        .querySelectorAll(".day")
+        .forEach(e=>e.style.background="");
+
+      cell.style.background="#1b2b3a";
+      detailEl.textContent =
+        `DATE : ${dateStr}\n`+
+        `TITLE : ${records[dateStr].title}\n\n`+
+        records[dateStr].detail;
+    });
+  }
+
+  calEl.appendChild(cell);
+}
+
+/* ===============================
+   EFFECTS
+=============================== */
+const style=document.createElement("style");
+style.textContent=`
+@keyframes flicker{
+  0%,100%{opacity:1}
+  50%{opacity:.5}
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-1px)}
+  75%{transform:translateX(1px)}
+}`;
+document.head.appendChild(style);
+</script>
+
 </body>
 </html>
