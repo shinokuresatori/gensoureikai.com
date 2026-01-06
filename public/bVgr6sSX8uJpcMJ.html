@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>調査の手引き</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP&display=swap" rel="stylesheet">
+
+<style>
+body{
+  background:#000;
+  color:#e0e0e0;
+  font-family:'Noto Serif JP',serif;
+  letter-spacing:.2em;
+  padding:48px;
+}
+h1{
+  font-weight:normal;
+  margin-bottom:36px;
+}
+.section{
+  margin-bottom:48px;
+  line-height:2;
+}
+button{
+  background:#000;
+  color:#ccc;
+  border:1px solid #555;
+  padding:12px 24px;
+  font-family:inherit;
+  letter-spacing:.2em;
+  cursor:pointer;
+}
+button:hover{background:#111}
+.note{
+  margin-top:24px;
+  font-size:12px;
+  color:#777;
+}
+</style>
+</head>
+
+<body>
+
+<h1>調査の手引き</h1>
+
+<div class="section">
+  この調査は、単独で完結することを想定していません。<br>
+  記録・観測・照合を行う外部機構との接続が推奨されます。
+</div>
+
+<div class="section">
+  <button onclick="connectBPS()">BPSへ接続</button>
+  <div class="note">
+    ※ 接続は任意です<br>
+    ※ 接続情報は記録されます
+  </div>
+</div>
+
+<script>
+function connectBPS(){
+  /* ARG固有トークン（商品ごとに固定） */
+  const ARG_TOKEN = "wq8JvX2bT9sLk3pQz1Rf";
+
+  /* BPS 側にトークンを渡す（gensoureikai.onrender.com） */
+  const baseURL = "https://gensoureikai.onrender.com/dds/group-photo-ARG1";
+  const url = `${baseURL}?connect=${ARG_TOKEN}`;
+  
+  window.location.href = url;
+}
+</script>
+
+</body>
+</html>
