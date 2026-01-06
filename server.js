@@ -23,7 +23,7 @@ app.get("/", (req, res) => {
 
 // ===== 調査の手引きページ =====
 app.get("/instruction", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "instruction.html"));
+  res.sendFile(path.join(__dirname, "public", "bVgr6sSX8uJpcMJ.html"));
 });
 
 // ===== admin ログイン =====
