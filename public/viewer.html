@@ -298,24 +298,23 @@ const ARG_DATA={
   });
 });
 
-/* ===== CALENDAR 完全版 ===== */
-let DATA=JSON.parse(localStorage.getItem("bps_calendar_data")||"{}");
-(function seed(){
-  if(Object.keys(DATA).length) return;
-  const b=new Date();
-  for(let i=2;i<=6;i++){
-    const d=new Date(b);d.setDate(d.getDate()+i);
-    DATA[d.toISOString().slice(0,10)]="未公開の調査記録が存在します。";
-  }
-  localStorage.setItem("bps_calendar_data",JSON.stringify(DATA));
-})();
+/* ===== CALENDAR（server連携） ===== */
+fetch("/api/data")
+  .then(r=>r.json())
+  .then(DATA=>{
+    buildCalendar(DATA);
+  });
+
 function getTodayJST(){
-  const d=new Date();d.setHours(d.getHours()+9);
+  const d=new Date();
   return d.toISOString().slice(0,10);
 }
-function mask(t){return "▓".repeat(Math.max(10,t.length))}
-let selected=null;
-(function(){
+function mask(t){
+  return "▓".repeat(Math.max(10,t.length));
+}
+
+function buildCalendar(DATA){
+  let selected=null;
   const now=new Date();
   const y=now.getFullYear(),m=now.getMonth();
   const cal=document.getElementById("calendar");
@@ -323,25 +322,33 @@ let selected=null;
 
   ["日","月","火","水","木","金","土"].forEach(w=>{
     const d=document.createElement("div");
-    d.className="weekday";d.textContent=w;cal.appendChild(d);
+    d.className="weekday";
+    d.textContent=w;
+    cal.appendChild(d);
   });
 
   for(let i=0;i<new Date(y,m,1).getDay();i++){
     const e=document.createElement("div");
-    e.className="day";e.style.visibility="hidden";cal.appendChild(e);
+    e.className="day";
+    e.style.visibility="hidden";
+    cal.appendChild(e);
   }
 
   for(let d=1;d<=new Date(y,m+1,0).getDate();d++){
     const key=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
     const cell=document.createElement("div");
-    cell.className="day";cell.textContent=d;
+    cell.className="day";
+    cell.textContent=d;
+
     if(DATA[key]) cell.classList.add("has");
     if(key>today) cell.classList.add("future");
     if(key===today) cell.classList.add("today");
 
     cell.onclick=()=>{
       if(selected) selected.classList.remove("selected");
-      cell.classList.add("selected");selected=cell;
+      cell.classList.add("selected");
+      selected=cell;
+
       const det=document.getElementById("detail");
       if(DATA[key]){
         det.textContent=`【${key}】\n\n`+(key>today?mask(DATA[key]):DATA[key]);
@@ -353,7 +360,7 @@ let selected=null;
     };
     cal.appendChild(cell);
   }
-})();
+}
 </script>
 
 </body>
