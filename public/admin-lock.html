@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>BPS ADMIN LOCK</title>
+<style>
+body{
+  background:#000;
+  color:#ccc;
+  font-family:Consolas,monospace;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+input,button{
+  background:#000;
+  border:1px solid #444;
+  color:#ccc;
+  padding:6px;
+}
+</style>
+</head>
+<body>
+
+<div>
+  <h3>ADMIN ACCESS</h3>
+  <input id="key" placeholder="ADMIN KEY">
+  <button onclick="login()">ENTER</button>
+  <div id="msg"></div>
+</div>
+
+<script>
+function login(){
+  fetch("/api/admin-login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({key:document.getElementById("key").value})
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.ok){
+      localStorage.setItem("bps_admin","1");
+      location.href="/admin-panel.html";
+    }else{
+      document.getElementById("msg").textContent="ACCESS DENIED";
+    }
+  });
+}
+</script>
+
+</body>
+</html>
