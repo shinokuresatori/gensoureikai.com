@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-/* ===== CORE ===== */
 :root{
   --bg:#0a0a0a;
   --panel:#101010;
@@ -29,11 +28,7 @@ body{
   letter-spacing:.08em;
 }
 
-/* ===== LAYOUT ===== */
-.wrapper{
-  display:flex;
-  min-height:100vh;
-}
+.wrapper{display:flex;min-height:100vh}
 
 /* ===== SIDEBAR ===== */
 .sidebar{
@@ -42,25 +37,19 @@ body{
   background:#080808;
   padding:16px 14px;
 }
-
 .sidebar h1{
   font-size:11px;
   font-weight:normal;
   color:var(--sub);
   margin:0 0 16px;
 }
-
-.tool-group{
-  margin-bottom:24px;
-}
-
+.tool-group{margin-bottom:24px}
 .tool-group h2{
   font-size:10px;
   font-weight:normal;
   color:#666;
   margin:0 0 8px;
 }
-
 .tool-btn{
   display:block;
   width:100%;
@@ -69,14 +58,11 @@ body{
   background:#000;
   border:1px solid var(--line);
   color:var(--text);
-  font-family:inherit;
   font-size:11px;
   text-align:left;
   cursor:pointer;
 }
-
 .tool-btn:hover{background:#111}
-
 .tool-btn.alert{
   border-color:var(--alert);
   color:#ffb3b3;
@@ -84,8 +70,6 @@ body{
 
 /* ===== MAIN ===== */
 .main{flex:1}
-
-/* ===== HEADER ===== */
 header{
   border-bottom:1px solid var(--line);
   padding:10px 24px;
@@ -94,22 +78,17 @@ header{
   font-size:11px;
   color:var(--sub);
 }
-
-/* ===== CONTENT ===== */
 main{
   max-width:1200px;
   margin:24px auto;
   padding:0 24px;
 }
-
 .panel{
   position:relative;
   background:var(--panel);
   border:1px solid var(--line);
   padding:18px;
-  margin-bottom:24px;
 }
-
 .panel::before,.panel::after{
   content:"";
   position:absolute;
@@ -125,7 +104,6 @@ main{
   border-bottom:1px solid var(--text);
   border-right:1px solid var(--text);
 }
-
 h2{
   font-size:11px;
   font-weight:normal;
@@ -133,18 +111,16 @@ h2{
   margin:0 0 12px;
 }
 
-/* ===== Viewer ===== */
+/* ===== VIEWER ===== */
 .viewer{
   font-family:'Noto Serif JP',serif;
   letter-spacing:.25em;
   color:#e0e0e0;
 }
-
 .viewer h3{
   font-weight:normal;
   margin-top:30px;
 }
-
 .viewer h3::before{
   content:"┏━━━━━━━━━━━━━━━━━━━━━━┓";
   display:block;
@@ -158,12 +134,7 @@ h2{
   margin-top:6px;
 }
 
-.arg-list{
-  display:flex;
-  gap:20px;
-  flex-wrap:wrap;
-}
-
+.arg-list{display:flex;gap:20px;flex-wrap:wrap}
 .arg-card{
   background:#050505;
   border:1px solid #555;
@@ -172,24 +143,16 @@ h2{
   text-align:center;
   position:relative;
 }
-
-.arg-card img{
-  width:100%;
-  margin-bottom:6px;
-}
-
+.arg-card img{width:100%;margin-bottom:6px}
 .arg-status{
   position:absolute;
-  top:6px;
-  right:6px;
+  top:6px;right:6px;
   background:#6fa8ff;
   color:#000;
   font-size:.7em;
   padding:2px 4px;
 }
-
-.arg-title{font-weight:bold;margin-bottom:6px;}
-
+.arg-title{font-weight:bold;margin-bottom:6px}
 .arg-link button{
   background:#000;
   color:#ccc;
@@ -197,7 +160,7 @@ h2{
   padding:4px 8px;
 }
 
-/* calendar */
+/* ===== CALENDAR ===== */
 .calendar{
   display:grid;
   grid-template-columns:repeat(7,1fr);
@@ -206,22 +169,25 @@ h2{
   padding:4px;
   background:#020202;
 }
-.weekday{
-  text-align:center;
-  font-size:.8em;
-  color:#666;
-}
+.weekday{text-align:center;font-size:.8em;color:#666}
 .day{
   border:1px solid #222;
   padding:8px;
   min-height:50px;
+  position:relative;
+  cursor:pointer;
 }
 .day.has::after{
   content:"■";
-  float:right;
+  position:absolute;
+  bottom:4px;
+  right:6px;
   font-size:10px;
   color:#888;
 }
+.day.future{color:#444}
+.day.today{outline:1px solid #fff}
+.day.selected{outline:2px solid #6fa8ff}
 
 #detail{
   margin-top:20px;
@@ -230,24 +196,28 @@ h2{
   background:#050505;
   white-space:pre-wrap;
 }
+#detail.future{
+  animation: blinkMask 1s infinite;
+}
+@keyframes blinkMask{
+  0%,50%,100%{color:#444;transform:translateX(0)}
+  25%{color:#888;transform:translateX(1px)}
+  75%{color:#bbb;transform:translateX(-1px)}
+}
 </style>
 </head>
 
 <body>
-
 <div class="wrapper">
 
-<!-- ===== LEFT TOOL PANEL ===== -->
 <aside class="sidebar">
   <h1>BPS CORE</h1>
-
   <div class="tool-group">
     <h2>ACCOUNT</h2>
     <button class="tool-btn">LOGIN</button>
     <button class="tool-btn">ACCOUNT STATUS</button>
     <button class="tool-btn">CLEAR SESSION</button>
   </div>
-
   <div class="tool-group">
     <h2>TOOLS</h2>
     <button class="tool-btn">CASE INDEX</button>
@@ -255,142 +225,135 @@ h2{
     <button class="tool-btn">ARCHIVE VIEWER</button>
     <button class="tool-btn">TRACE ANALYSIS</button>
   </div>
-
   <div class="tool-group">
     <h2>SYSTEM</h2>
     <button class="tool-btn alert">EMERGENCY LOCK</button>
   </div>
 </aside>
 
-<!-- ===== MAIN ===== -->
 <div class="main">
-
 <header>
   <div>SYSTEM ID : BPS-CORE-α</div>
   <div>BUILD 0.41 / CHECKSUM 9F2A</div>
 </header>
 
 <main>
-  <div class="panel">
-    <h2>CASE_014 / OBSERVATION MODULE</h2>
+<div class="panel">
+<h2>CASE_014 / OBSERVATION MODULE</h2>
 
-    <div class="viewer">
-      <h3>調査中のARG</h3>
-      <div class="arg-list" id="investigation"></div>
+<div class="viewer">
+  <h3>調査中のARG</h3>
+  <div class="arg-list" id="investigation"></div>
 
-      <h3>本日の記録</h3>
-      <div id="today">読み込み中…</div>
+  <h3>本日の記録</h3>
+  <div id="today"></div>
 
-      <h3>今開催中のリアルタイムARG</h3>
-      <div class="arg-list" id="realtime"></div>
+  <h3>今開催中のリアルタイムARG</h3>
+  <div class="arg-list" id="realtime"></div>
 
-      <h3>販売中のARG</h3>
-      <div class="arg-list" id="onsale"></div>
+  <h3>販売中のARG</h3>
+  <div class="arg-list" id="onsale"></div>
 
-      <h3>記録カレンダー</h3>
-      <div class="calendar" id="calendar"></div>
-      <div id="detail"></div>
-    </div>
-  </div>
+  <h3>記録カレンダー</h3>
+  <div class="calendar" id="calendar"></div>
+  <div id="detail"></div>
+</div>
+</div>
 </main>
-
 </div>
 </div>
 
 <script>
-/* ===============================
-   ARG 連携受信・保存ロジック
-   UI・挙動は一切変更しない
-=============================== */
+/* ===== ARG 連携受信 ===== */
 (function(){
-  const params = new URLSearchParams(location.search);
-  const token = params.get("connect");
+  const p=new URLSearchParams(location.search);
+  const token=p.get("connect");
   if(!token) return;
-
-  const storeKey = "bps_linked_args";
-  const linked =
-    JSON.parse(localStorage.getItem(storeKey) || "{}");
-
-  if(!linked[token]){
-    linked[token] = {
-      connectedAt: new Date().toISOString(),
-      status: "linked"
-    };
-    localStorage.setItem(storeKey, JSON.stringify(linked));
-    console.log("[BPS] External ARG linked:", token);
+  const k="bps_linked_args";
+  const d=JSON.parse(localStorage.getItem(k)||"{}");
+  if(!d[token]){
+    d[token]={connectedAt:new Date().toISOString()};
+    localStorage.setItem(k,JSON.stringify(d));
   }
-
-  /* URLを静かに消去 */
   history.replaceState(null,"",location.pathname);
 })();
 
-/* ===== Viewerダミー描画 ===== */
+/* ===== ARG ダミー ===== */
 const DUMMY_IMG="./dummy.png";
 const ARG_DATA={
-  investigation:[{id:"A1",title:"ARG-α",status:"調査中",thumbnail:DUMMY_IMG}],
-  realtime:[{id:"B1",title:"ARG-β",status:"進行中",thumbnail:DUMMY_IMG}],
-  onsale:[{id:"C1",title:"ARG-γ",status:"販売中",thumbnail:DUMMY_IMG}]
+  investigation:[{title:"ARG-α",status:"調査中",thumbnail:DUMMY_IMG}],
+  realtime:[{title:"ARG-β",status:"進行中",thumbnail:DUMMY_IMG}],
+  onsale:[{title:"ARG-γ",status:"販売中",thumbnail:DUMMY_IMG}]
 };
-
-function renderARG(){
-  ["investigation","realtime","onsale"].forEach(sec=>{
-    const el=document.getElementById(sec);
-    el.innerHTML="";
-    ARG_DATA[sec].forEach(a=>{
-      const c=document.createElement("div");
-      c.className="arg-card";
-      c.innerHTML=`
+["investigation","realtime","onsale"].forEach(k=>{
+  const el=document.getElementById(k);
+  ARG_DATA[k].forEach(a=>{
+    el.innerHTML+=`
+      <div class="arg-card">
         <img src="${a.thumbnail}">
         <div class="arg-status">${a.status}</div>
         <div class="arg-title">${a.title}</div>
         <div class="arg-link"><button>OPEN</button></div>
-      `;
-      el.appendChild(c);
-    });
+      </div>`;
   });
+});
+
+/* ===== CALENDAR 完全版 ===== */
+let DATA=JSON.parse(localStorage.getItem("bps_calendar_data")||"{}");
+(function seed(){
+  if(Object.keys(DATA).length) return;
+  const b=new Date();
+  for(let i=2;i<=6;i++){
+    const d=new Date(b);d.setDate(d.getDate()+i);
+    DATA[d.toISOString().slice(0,10)]="未公開の調査記録が存在します。";
+  }
+  localStorage.setItem("bps_calendar_data",JSON.stringify(DATA));
+})();
+function getTodayJST(){
+  const d=new Date();d.setHours(d.getHours()+9);
+  return d.toISOString().slice(0,10);
 }
-renderARG();
-</script>
-<script>
-/* ===== カレンダー描画（最小・UI非変更） ===== */
+function mask(t){return "▓".repeat(Math.max(10,t.length))}
+let selected=null;
 (function(){
-  const cal = document.getElementById("calendar");
-  if(!cal) return;
+  const now=new Date();
+  const y=now.getFullYear(),m=now.getMonth();
+  const cal=document.getElementById("calendar");
+  const today=getTodayJST();
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth(); // 0-based
-
-  const weekdays = ["日","月","火","水","木","金","土"];
-
-  // 曜日ヘッダ
-  weekdays.forEach(w=>{
-    const d = document.createElement("div");
-    d.className = "weekday";
-    d.textContent = w;
-    cal.appendChild(d);
+  ["日","月","火","水","木","金","土"].forEach(w=>{
+    const d=document.createElement("div");
+    d.className="weekday";d.textContent=w;cal.appendChild(d);
   });
 
-  // 月初の曜日
-  const firstDay = new Date(year, month, 1).getDay();
-  for(let i=0;i<firstDay;i++){
-    const e = document.createElement("div");
-    e.className = "day";
-    e.style.visibility = "hidden";
-    cal.appendChild(e);
+  for(let i=0;i<new Date(y,m,1).getDay();i++){
+    const e=document.createElement("div");
+    e.className="day";e.style.visibility="hidden";cal.appendChild(e);
   }
 
-  // 月の日数
-  const lastDate = new Date(year, month + 1, 0).getDate();
+  for(let d=1;d<=new Date(y,m+1,0).getDate();d++){
+    const key=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const cell=document.createElement("div");
+    cell.className="day";cell.textContent=d;
+    if(DATA[key]) cell.classList.add("has");
+    if(key>today) cell.classList.add("future");
+    if(key===today) cell.classList.add("today");
 
-  for(let d=1; d<=lastDate; d++){
-    const cell = document.createElement("div");
-    cell.className = "day";
-    cell.textContent = d;
+    cell.onclick=()=>{
+      if(selected) selected.classList.remove("selected");
+      cell.classList.add("selected");selected=cell;
+      const det=document.getElementById("detail");
+      if(DATA[key]){
+        det.textContent=`【${key}】\n\n`+(key>today?mask(DATA[key]):DATA[key]);
+        det.classList.toggle("future",key>today);
+      }else{
+        det.textContent=`【${key}】\n\n記録なし`;
+        det.classList.remove("future");
+      }
+    };
     cal.appendChild(cell);
   }
 })();
 </script>
-
 </body>
 </html>
